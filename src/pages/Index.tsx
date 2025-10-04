@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy, Clock, ArrowUpDown, X, Smartphone } from 'lucide-react';
+import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy, Clock, ArrowUpDown, X, Smartphone, Languages } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ToiletMap from '@/components/ToiletMap';
 import ToiletCard from '@/components/ToiletCard';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import {
   Sheet,
@@ -26,6 +30,7 @@ import { Badge } from '@/components/ui/badge';
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [toilets, setToilets] = useState<any[]>([]);
   const [nearbyToilets, setNearbyToilets] = useState<any[]>([]);
@@ -82,13 +87,15 @@ const Index = () => {
           fetchNearbyToilets(location.lat, location.lng);
         },
         () => {
-          const defaultLocation = { lat: 54.8985, lng: 23.9036 };
+          // Default to Vilnius (capital of Lithuania) if geolocation fails
+          const defaultLocation = { lat: 54.6872, lng: 25.2797 };
           setUserLocation(defaultLocation);
           fetchNearbyToilets(defaultLocation.lat, defaultLocation.lng);
         }
       );
     } else {
-      const defaultLocation = { lat: 54.8985, lng: 23.9036 };
+      // Default to Vilnius (capital of Lithuania)
+      const defaultLocation = { lat: 54.6872, lng: 25.2797 };
       setUserLocation(defaultLocation);
       fetchNearbyToilets(defaultLocation.lat, defaultLocation.lng);
     }
@@ -221,8 +228,8 @@ const Index = () => {
   const openInGoogleMaps = (toilet: any) => {
     if (!userLocation) {
       toast({
-        title: 'Location Required',
-        description: 'Please enable location services',
+        title: t('location.required'),
+        description: t('location.enableServices'),
         variant: 'destructive',
       });
       return;
@@ -240,8 +247,8 @@ const Index = () => {
     if (!isMobile) {
       navigator.clipboard.writeText(destination);
       toast({
-        title: 'Coordinates Copied',
-        description: `${destination} - Use "Directions" for in-app navigation or paste into your maps app`,
+        title: t('location.coordinatesCopied'),
+        description: `${destination} - ${t('location.useInApp')}`,
       });
       return;
     }
@@ -251,8 +258,8 @@ const Index = () => {
       // Use Apple Maps for iOS devices
       window.location.href = `maps://?saddr=${origin}&daddr=${destination}&dirflg=w`;
       toast({
-        title: 'Opening Apple Maps',
-        description: 'Launching navigation...',
+        title: t('navigation.openingAppleMaps'),
+        description: t('navigation.launching'),
       });
     } else if (isAndroid) {
       // Use Google Maps for Android devices
@@ -264,19 +271,27 @@ const Index = () => {
       }, 500);
       
       toast({
-        title: 'Opening Google Maps',
-        description: 'Launching navigation...',
+        title: t('navigation.openingGoogleMaps'),
+        description: t('navigation.launching'),
       });
     }
   };
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    toast({
+      title: t('settings.language'),
+      description: lng === 'lt' ? t('settings.lithuanian') : t('settings.english'),
+    });
+  };
+
   const copyCoordinates = () => {
     if (selectedToilet) {
-      const locationInfo = `${selectedToilet.name}\n${selectedToilet.address}\nCoordinates: ${selectedToilet.latitude},${selectedToilet.longitude}`;
+      const locationInfo = `${selectedToilet.name}\n${selectedToilet.address}\n${t('details.coordinates')}: ${selectedToilet.latitude},${selectedToilet.longitude}`;
       navigator.clipboard.writeText(locationInfo);
       toast({
-        title: 'Location Copied!',
-        description: 'Address and coordinates copied to clipboard',
+        title: t('location.copied'),
+        description: t('location.addressCopied'),
       });
     }
   };
@@ -298,17 +313,19 @@ const Index = () => {
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MapPin className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">CityP</h1>
+            <h1 className="text-xl font-bold">{t('app.name')}</h1>
           </div>
           
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            
             <Button
               size="sm"
               onClick={() => navigate('/add-toilet')}
               className="gap-1"
             >
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Toilet</span>
+              <span className="hidden sm:inline">{t('nav.addToilet')}</span>
             </Button>
             
             <DropdownMenu>
@@ -320,7 +337,7 @@ const Index = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  {t('nav.signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -333,7 +350,7 @@ const Index = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search toilets..."
+            placeholder={t('search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -347,7 +364,7 @@ const Index = () => {
             size="sm"
             onClick={() => setTypeFilter('all')}
           >
-            All
+            {t('filter.all')}
           </Button>
           <Button
             variant={typeFilter === 'free' ? 'default' : 'outline'}
@@ -355,7 +372,7 @@ const Index = () => {
             onClick={() => setTypeFilter('free')}
             className={typeFilter === 'free' ? 'bg-success hover:bg-success/90' : ''}
           >
-            Free
+            {t('filter.free')}
           </Button>
           <Button
             variant={typeFilter === 'paid' ? 'default' : 'outline'}
@@ -363,7 +380,7 @@ const Index = () => {
             onClick={() => setTypeFilter('paid')}
             className={typeFilter === 'paid' ? 'bg-warning hover:bg-warning/90' : ''}
           >
-            Paid
+            {t('filter.paid')}
           </Button>
 
           <div className="w-px h-6 bg-border mx-1" />
@@ -374,14 +391,14 @@ const Index = () => {
             size="sm"
             onClick={() => setSortBy('distance')}
           >
-            Distance
+            {t('filter.distance')}
           </Button>
           <Button
             variant={sortBy === 'rating' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setSortBy('rating')}
           >
-            Rating
+            {t('filter.rating')}
           </Button>
         </div>
       </div>

@@ -1,0 +1,114 @@
+{
+  "app": {
+    "name": "CityP",
+    "tagline": "Find toilets across Lithuania"
+  },
+  "nav": {
+    "addToilet": "Add Toilet",
+    "signOut": "Sign Out",
+    "map": "Map",
+    "list": "List"
+  },
+  "search": {
+    "placeholder": "Search toilets...",
+    "noResults": "No toilets found"
+  },
+  "filter": {
+    "all": "All",
+    "free": "Free",
+    "paid": "Paid",
+    "distance": "Distance",
+    "rating": "Rating"
+  },
+  "toilet": {
+    "free": "Free",
+    "paid": "Paid",
+    "navigate": "Navigate",
+    "directions": "Directions",
+    "viewDetails": "View Details",
+    "nearby": "Nearby Toilets",
+    "addFirst": "Add First Toilet",
+    "distance": {
+      "meters": "{{distance}}m away",
+      "km": "{{distance}}km away"
+    }
+  },
+  "navigation": {
+    "showingDirections": "Showing Directions",
+    "routeDisplayed": "Route displayed on the map",
+    "openingAppleMaps": "Opening Apple Maps",
+    "openingGoogleMaps": "Opening Google Maps",
+    "launching": "Launching navigation...",
+    "walking": "Walking",
+    "getDirections": "Get Directions",
+    "cancelNavigation": "Cancel",
+    "openInAppleMaps": "Open in Apple Maps",
+    "openInGoogleMaps": "Open in Google Maps",
+    "copyCoordinates": "Copy Coordinates"
+  },
+  "details": {
+    "description": "Description",
+    "openingHours": "Opening Hours",
+    "accessibilityFeatures": "Accessibility Features",
+    "location": "Location",
+    "coordinates": "Coordinates",
+    "copyFullAddress": "Copy Full Address & Coordinates",
+    "accessible": "Accessible"
+  },
+  "location": {
+    "required": "Location Required",
+    "enableServices": "Please enable location services",
+    "copied": "Location Copied!",
+    "addressCopied": "Address and coordinates copied to clipboard",
+    "coordinatesCopied": "Coordinates Copied",
+    "useInApp": "Use 'Directions' for in-app navigation or paste into your maps app"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "username": "Username",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "welcomeBack": "Welcome back!",
+    "createAccount": "Create an account",
+    "getStarted": "Get started with CityP"
+  },
+  "addToilet": {
+    "title": "Add New Toilet",
+    "name": "Name",
+    "namePlaceholder": "e.g., Kaunas Central Station",
+    "address": "Address",
+    "addressPlaceholder": "Enter street address",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "Additional information about this toilet",
+    "type": "Type",
+    "price": "Price (€)",
+    "pricePlaceholder": "Enter price in euros",
+    "openingHours": "Opening Hours (optional)",
+    "openingHoursPlaceholder": "e.g., 8:00-20:00",
+    "accessibility": "Accessibility (optional)",
+    "accessibilityPlaceholder": "e.g., Wheelchair accessible, No steps",
+    "coordinates": "Coordinates",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "getCurrentLocation": "Get Current Location",
+    "submit": "Add Toilet",
+    "cancel": "Cancel",
+    "success": "Success!",
+    "toiletAdded": "Toilet added successfully",
+    "error": "Error",
+    "fillRequired": "Please fill in all required fields"
+  },
+  "loading": {
+    "map": "Loading map...",
+    "gettingLocation": "Getting location...",
+    "loading": "Loading..."
+  },
+  "settings": {
+    "language": "Language",
+    "lithuanian": "Lithuanian",
+    "english": "English"
+  }
+}

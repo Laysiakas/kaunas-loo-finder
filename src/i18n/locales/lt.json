@@ -1,0 +1,114 @@
+{
+  "app": {
+    "name": "CityP",
+    "tagline": "Raskite tualetus visoje Lietuvoje"
+  },
+  "nav": {
+    "addToilet": "Pridėti tualetą",
+    "signOut": "Atsijungti",
+    "map": "Žemėlapis",
+    "list": "Sąrašas"
+  },
+  "search": {
+    "placeholder": "Ieškoti tualetų...",
+    "noResults": "Tualetų nerasta"
+  },
+  "filter": {
+    "all": "Visi",
+    "free": "Nemokami",
+    "paid": "Mokami",
+    "distance": "Atstumas",
+    "rating": "Įvertinimas"
+  },
+  "toilet": {
+    "free": "Nemokamas",
+    "paid": "Mokamas",
+    "navigate": "Navigacija",
+    "directions": "Nuorodos",
+    "viewDetails": "Peržiūrėti detales",
+    "nearby": "Tualetai netoliese",
+    "addFirst": "Pridėti pirmą tualetą",
+    "distance": {
+      "meters": "{{distance}}m atstumu",
+      "km": "{{distance}}km atstumu"
+    }
+  },
+  "navigation": {
+    "showingDirections": "Rodomas maršrutas",
+    "routeDisplayed": "Maršrutas rodomas žemėlapyje",
+    "openingAppleMaps": "Atidaroma Apple žemėlapiai",
+    "openingGoogleMaps": "Atidaroma Google žemėlapiai",
+    "launching": "Paleidžiama navigacija...",
+    "walking": "Pėsčiomis",
+    "getDirections": "Gauti nuorodas",
+    "cancelNavigation": "Atšaukti",
+    "openInAppleMaps": "Atidaryti Apple žemėlapiuose",
+    "openInGoogleMaps": "Atidaryti Google žemėlapiuose",
+    "copyCoordinates": "Kopijuoti koordinates"
+  },
+  "details": {
+    "description": "Aprašymas",
+    "openingHours": "Darbo laikas",
+    "accessibilityFeatures": "Prieinamumo funkcijos",
+    "location": "Vieta",
+    "coordinates": "Koordinatės",
+    "copyFullAddress": "Kopijuoti visą adresą ir koordinates",
+    "accessible": "Pritaikyta neįgaliesiems"
+  },
+  "location": {
+    "required": "Reikalinga vieta",
+    "enableServices": "Prašome įjungti vietos paslaugas",
+    "copied": "Vieta nukopijuota!",
+    "addressCopied": "Adresas ir koordinatės nukopijuotos į iškarpinę",
+    "coordinatesCopied": "Koordinatės nukopijuotos",
+    "useInApp": "Naudokite 'Nuorodos' programoje arba įklijuokite į žemėlapių programą"
+  },
+  "auth": {
+    "signIn": "Prisijungti",
+    "signUp": "Registruotis",
+    "email": "El. paštas",
+    "password": "Slaptažodis",
+    "username": "Vartotojo vardas",
+    "alreadyHaveAccount": "Jau turite paskyrą?",
+    "dontHaveAccount": "Neturite paskyros?",
+    "welcomeBack": "Sveiki sugrįžę!",
+    "createAccount": "Sukurkite paskyrą",
+    "getStarted": "Pradėti naudotis CityP"
+  },
+  "addToilet": {
+    "title": "Pridėti naują tualetą",
+    "name": "Pavadinimas",
+    "namePlaceholder": "pvz., Kauno centrinė stotis",
+    "address": "Adresas",
+    "addressPlaceholder": "Įveskite gatvės adresą",
+    "description": "Aprašymas (neprivaloma)",
+    "descriptionPlaceholder": "Papildoma informacija apie šį tualetą",
+    "type": "Tipas",
+    "price": "Kaina (€)",
+    "pricePlaceholder": "Įveskite kainą eurais",
+    "openingHours": "Darbo laikas (neprivaloma)",
+    "openingHoursPlaceholder": "pvz., 8:00-20:00",
+    "accessibility": "Prieinamumas (neprivaloma)",
+    "accessibilityPlaceholder": "pvz., Vežimėlis, Pakopų nėra",
+    "coordinates": "Koordinatės",
+    "latitude": "Platuma",
+    "longitude": "Ilguma",
+    "getCurrentLocation": "Gauti dabartinę vietą",
+    "submit": "Pridėti tualetą",
+    "cancel": "Atšaukti",
+    "success": "Sėkmė!",
+    "toiletAdded": "Tualetas sėkmingai pridėtas",
+    "error": "Klaida",
+    "fillRequired": "Prašome užpildyti visus būtinus laukus"
+  },
+  "loading": {
+    "map": "Kraunamas žemėlapis...",
+    "gettingLocation": "Gaunama vieta...",
+    "loading": "Kraunama..."
+  },
+  "settings": {
+    "language": "Kalba",
+    "lithuanian": "Lietuvių",
+    "english": "Anglų"
+  }
+}

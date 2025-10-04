@@ -292,7 +292,9 @@ const Index = () => {
   };
 
   const openInGoogleMaps = (toilet: any) => {
-    if (!userLocation) {
+    const startLocation = pinnedLocation || userLocation;
+    
+    if (!startLocation) {
       toast({
         title: t('location.required'),
         description: t('location.enableServices'),
@@ -302,7 +304,7 @@ const Index = () => {
     }
 
     const destination = `${toilet.latitude},${toilet.longitude}`;
-    const origin = `${userLocation.lat},${userLocation.lng}`;
+    const origin = `${startLocation.lat},${startLocation.lng}`;
     
     // Detect platform
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
@@ -529,6 +531,7 @@ const Index = () => {
                 }}
                 onMapClick={handleMapClick}
                 pinnedLocation={pinnedLocation}
+                userLocation={userLocation}
               />
               
               {loading && (

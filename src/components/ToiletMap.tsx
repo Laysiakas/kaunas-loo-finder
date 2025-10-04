@@ -28,9 +28,10 @@ interface ToiletMapProps {
   onDirectionsCalculated?: (duration: string, distance: string) => void;
   onMapClick?: (lat: number, lng: number) => void;
   pinnedLocation?: { lat: number; lng: number } | null;
+  userLocation?: { lat: number; lng: number } | null;
 }
 
-const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, onDirectionsCalculated, onMapClick, pinnedLocation }: ToiletMapProps) => {
+const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, onDirectionsCalculated, onMapClick, pinnedLocation, userLocation: propUserLocation }: ToiletMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -162,13 +163,18 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
   }, [selectedToiletId, toilets]);
 
   useEffect(() => {
-    if (!googleMapRef.current || !window.google || !directionsTo || !userLocation) {
+    if (!googleMapRef.current || !window.google || !directionsTo) {
       if (directionsRendererRef.current) {
         directionsRendererRef.current.setMap(null);
         directionsRendererRef.current = null;
       }
       return;
     }
+
+    // Use pinned location as origin if available, otherwise use user location
+    const startLocation = pinnedLocation || propUserLocation || userLocation;
+    
+    if (!startLocation) return;
 
     // Clear previous directions
     if (directionsRendererRef.current) {
@@ -189,7 +195,7 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
     const directionsService = new window.google.maps.DirectionsService();
     directionsService.route(
       {
-        origin: userLocation,
+        origin: startLocation,
         destination: directionsTo,
         travelMode: window.google.maps.TravelMode.WALKING,
       },
@@ -199,7 +205,7 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
           
           // Zoom to fit the route
           const bounds = new window.google.maps.LatLngBounds();
-          bounds.extend(userLocation);
+          bounds.extend(startLocation);
           bounds.extend(directionsTo);
           googleMapRef.current?.fitBounds(bounds, { padding: 80 });
           
@@ -212,7 +218,7 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
         }
       }
     );
-  }, [directionsTo?.lat, directionsTo?.lng, userLocation?.lat, userLocation?.lng]);
+  }, [directionsTo?.lat, directionsTo?.lng, pinnedLocation?.lat, pinnedLocation?.lng, propUserLocation?.lat, propUserLocation?.lng, userLocation?.lat, userLocation?.lng]);
 
   // Handle pinned location marker
   useEffect(() => {

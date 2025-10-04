@@ -43,6 +43,8 @@ const Index = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [directionsTo, setDirectionsTo] = useState<{ lat: number; lng: number } | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ duration: string; distance: string } | null>(null);
+  const [pinnedLocation, setPinnedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [addressSearch, setAddressSearch] = useState('');
 
   useEffect(() => {
     // Check authentication
@@ -205,12 +207,55 @@ const Index = () => {
       filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
 
-    return filtered;
+    // Return only closest 5 toilets
+    return filtered.slice(0, 5);
   };
 
   const handleViewDetails = (toilet: any) => {
     setSelectedToilet(toilet);
     setDetailsOpen(true);
+  };
+
+  const handleMapClick = (lat: number, lng: number) => {
+    setPinnedLocation({ lat, lng });
+    fetchNearbyToilets(lat, lng);
+  };
+
+  const handleAddressSearch = async () => {
+    if (!addressSearch.trim()) return;
+
+    try {
+      const geocoder = new (window as any).google.maps.Geocoder();
+      geocoder.geocode({ address: addressSearch }, (results: any, status: any) => {
+        if (status === 'OK' && results[0]) {
+          const location = {
+            lat: results[0].geometry.location.lat(),
+            lng: results[0].geometry.location.lng(),
+          };
+          setPinnedLocation(location);
+          fetchNearbyToilets(location.lat, location.lng);
+          toast({
+            title: t('search.locationFound'),
+            description: results[0].formatted_address,
+          });
+        } else {
+          toast({
+            title: t('search.locationNotFound'),
+            description: t('search.tryDifferentAddress'),
+            variant: 'destructive',
+          });
+        }
+      });
+    } catch (error) {
+      console.error('Geocoding error:', error);
+    }
+  };
+
+  const handleClearPin = () => {
+    setPinnedLocation(null);
+    if (userLocation) {
+      fetchNearbyToilets(userLocation.lat, userLocation.lng);
+    }
   };
 
   const handleGetDirections = (toilet: any) => {
@@ -419,6 +464,32 @@ const Index = () => {
             </TabsList>
             
             <TabsContent value="map" className="space-y-4">
+              {/* Address Search */}
+              <div className="bg-card p-4 rounded-lg border space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={t('search.enterAddress')}
+                    value={addressSearch}
+                    onChange={(e) => setAddressSearch(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddressSearch()}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleAddressSearch} size="sm">
+                    <Search className="h-4 w-4" />
+                  </Button>
+                  {pinnedLocation && (
+                    <Button onClick={handleClearPin} size="sm" variant="outline">
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {pinnedLocation && (
+                  <p className="text-sm text-muted-foreground">
+                    {t('search.showingResultsFor')}: {pinnedLocation.lat.toFixed(5)}, {pinnedLocation.lng.toFixed(5)}
+                  </p>
+                )}
+              </div>
+
               <ToiletMap
                 toilets={filteredToilets}
                 onToiletSelect={setSelectedToilet}
@@ -427,6 +498,8 @@ const Index = () => {
                 onDirectionsCalculated={(duration, distance) => {
                   setRouteInfo({ duration, distance });
                 }}
+                onMapClick={handleMapClick}
+                pinnedLocation={pinnedLocation}
               />
               
               {loading && (

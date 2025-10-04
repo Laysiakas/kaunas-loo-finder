@@ -11,7 +11,12 @@
   },
   "search": {
     "placeholder": "Ieškoti tualetų...",
-    "noResults": "Tualetų nerasta"
+    "noResults": "Tualetų nerasta",
+    "enterAddress": "Įveskite adresą arba spustelėkite žemėlapį",
+    "locationFound": "Vieta Rasta",
+    "locationNotFound": "Vieta Nerasta",
+    "tryDifferentAddress": "Bandykite kitą adresą",
+    "showingResultsFor": "Rodomi rezultatai vietai"
   },
   "filter": {
     "all": "Visi",

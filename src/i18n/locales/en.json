@@ -11,7 +11,12 @@
   },
   "search": {
     "placeholder": "Search toilets...",
-    "noResults": "No toilets found"
+    "noResults": "No toilets found",
+    "enterAddress": "Enter address or click map to drop a pin",
+    "locationFound": "Location Found",
+    "locationNotFound": "Location Not Found",
+    "tryDifferentAddress": "Please try a different address",
+    "showingResultsFor": "Showing results for"
   },
   "filter": {
     "all": "All",

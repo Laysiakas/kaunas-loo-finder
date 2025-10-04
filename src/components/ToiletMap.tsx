@@ -26,13 +26,16 @@ interface ToiletMapProps {
   selectedToiletId?: string;
   directionsTo?: { lat: number; lng: number } | null;
   onDirectionsCalculated?: (duration: string, distance: string) => void;
+  onMapClick?: (lat: number, lng: number) => void;
+  pinnedLocation?: { lat: number; lng: number } | null;
 }
 
-const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, onDirectionsCalculated }: ToiletMapProps) => {
+const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, onDirectionsCalculated, onMapClick, pinnedLocation }: ToiletMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const directionsRendererRef = useRef<any>(null);
+  const pinnedMarkerRef = useRef<any>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const { t } = useTranslation();
@@ -84,9 +87,15 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
           elementType: 'labels',
           stylers: [{ visibility: 'off' }]
         }
-      ]
+      ],
+      gestureHandling: 'greedy',
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: true,
     });
 
+    // Add user location marker
     new window.google.maps.Marker({
       position: userLocation,
       map: googleMapRef.current,
@@ -100,7 +109,14 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
       },
       title: 'Your Location'
     });
-  }, [isMapLoaded, userLocation]);
+
+    // Add click listener for dropping pins
+    if (onMapClick) {
+      googleMapRef.current.addListener('click', (e: any) => {
+        onMapClick(e.latLng.lat(), e.latLng.lng());
+      });
+    }
+  }, [isMapLoaded, userLocation, onMapClick]);
 
   useEffect(() => {
     if (!googleMapRef.current || !window.google) return;
@@ -197,6 +213,35 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
       }
     );
   }, [directionsTo?.lat, directionsTo?.lng, userLocation?.lat, userLocation?.lng]);
+
+  // Handle pinned location marker
+  useEffect(() => {
+    if (!googleMapRef.current || !window.google) return;
+
+    // Remove previous pin
+    if (pinnedMarkerRef.current) {
+      pinnedMarkerRef.current.setMap(null);
+      pinnedMarkerRef.current = null;
+    }
+
+    // Add new pin if location is set
+    if (pinnedLocation) {
+      pinnedMarkerRef.current = new window.google.maps.Marker({
+        position: pinnedLocation,
+        map: googleMapRef.current,
+        icon: {
+          url: 'data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 24 24" fill="%23ef4444" stroke="%23ffffff" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="%23ffffff"/></svg>',
+          scaledSize: new window.google.maps.Size(32, 40),
+          anchor: new window.google.maps.Point(16, 40),
+        },
+        title: 'Search Location',
+        animation: window.google.maps.Animation.DROP,
+      });
+
+      googleMapRef.current.panTo(pinnedLocation);
+      googleMapRef.current.setZoom(15);
+    }
+  }, [pinnedLocation]);
 
   return (
     <div ref={mapRef} className="relative w-full h-[400px] bg-secondary rounded-xl overflow-hidden">

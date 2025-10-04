@@ -30,7 +30,7 @@ const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetD
   const { t } = useTranslation();
   
   return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={onViewDetails}>
+    <Card className="hover:shadow-lg transition-shadow cursor-pointer w-full max-w-full overflow-hidden" onClick={onViewDetails}>
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 space-y-1">
@@ -109,45 +109,45 @@ const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetD
           )}
         </div>
         
-        <div className="flex gap-2 pt-2">
+        <div className="flex flex-wrap gap-2 pt-2">
           {onNavigateInApp && (
             <Button
               variant="default"
               size="sm"
-              className="flex-1"
+              className="flex-1 min-w-[120px]"
               onClick={(e) => {
                 e.stopPropagation();
                 onNavigateInApp();
               }}
             >
               <Navigation className="h-4 w-4 mr-1" />
-              {t('toilet.navigate')}
+              <span className="truncate">{t('toilet.navigate')}</span>
             </Button>
           )}
           {onGetDirections && (
             <Button
               variant="outline"
               size="sm"
-              className="flex-1"
+              className="flex-1 min-w-[110px]"
               onClick={(e) => {
                 e.stopPropagation();
                 onGetDirections();
               }}
             >
               <Navigation className="h-4 w-4 mr-1" />
-              {t('toilet.directions')}
+              <span className="truncate">{t('toilet.directions')}</span>
             </Button>
           )}
           <Button
             size="sm"
             variant="outline"
-            className="flex-1"
+            className="flex-1 min-w-[130px]"
             onClick={(e) => {
               e.stopPropagation();
               onViewDetails?.();
             }}
           >
-            {t('toilet.viewDetails')}
+            <span className="truncate">{t('toilet.viewDetails')}</span>
           </Button>
         </div>
       </CardContent>

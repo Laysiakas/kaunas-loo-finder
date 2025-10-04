@@ -66,7 +66,10 @@
     "copied": "Vieta nukopijuota!",
     "addressCopied": "Adresas ir koordinatės nukopijuotos į iškarpinę",
     "coordinatesCopied": "Koordinatės nukopijuotos",
-    "useInApp": "Naudokite 'Nuorodos' programoje arba įklijuokite į žemėlapių programą"
+    "useInApp": "Naudokite 'Nuorodos' programoje arba įklijuokite į žemėlapių programą",
+    "focusMyLocation": "Sutelkti į mano vietą",
+    "focusedOnYou": "Sutelkta į Jūsų Vietą",
+    "showingNearbyToilets": "Rodomi netoliese esantys tualetai"
   },
   "auth": {
     "signIn": "Prisijungti",

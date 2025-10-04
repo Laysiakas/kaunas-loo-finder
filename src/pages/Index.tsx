@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy, Clock, ArrowUpDown, X, Smartphone, Languages } from 'lucide-react';
+import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy, Clock, ArrowUpDown, X, Smartphone, Languages, Crosshair } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ToiletMap from '@/components/ToiletMap';
 import ToiletCard from '@/components/ToiletCard';
@@ -261,6 +261,18 @@ const Index = () => {
     }
   };
 
+  const handleFocusMyLocation = () => {
+    setPinnedLocation(null);
+    if (userLocation) {
+      fetchNearbyToilets(userLocation.lat, userLocation.lng);
+      // Trigger map to pan to user location by updating a state or similar
+      toast({
+        title: t('location.focusedOnYou'),
+        description: t('location.showingNearbyToilets'),
+      });
+    }
+  };
+
   const handleGetDirections = (toilet: any) => {
     setDirectionsTo({ lat: toilet.latitude, lng: toilet.longitude });
     setSelectedToilet(toilet);
@@ -479,6 +491,14 @@ const Index = () => {
                   />
                   <Button onClick={handleAddressSearch} size="sm">
                     <Search className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    onClick={handleFocusMyLocation} 
+                    size="sm" 
+                    variant="outline"
+                    title={t('location.focusMyLocation')}
+                  >
+                    <Crosshair className="h-4 w-4" />
                   </Button>
                   {pinnedLocation && (
                     <Button onClick={handleClearPin} size="sm" variant="outline">

@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, MapPin } from 'lucide-react';
+import { ArrowLeft, MapPin, Upload, X } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
+import LocationPicker from '@/components/LocationPicker';
 
 const AddToilet = () => {
   const navigate = useNavigate();
@@ -21,14 +22,16 @@ const AddToilet = () => {
   const [formData, setFormData] = useState({
     name: '',
     address: '',
-    latitude: '',
-    longitude: '',
+    latitude: 0,
+    longitude: 0,
     type: 'free' as 'free' | 'paid',
     price: '',
     description: '',
     opening_hours: '',
   });
   const [accessibilityFeatures, setAccessibilityFeatures] = useState<string[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -47,16 +50,47 @@ const AddToilet = () => {
         (position) => {
           setFormData(prev => ({
             ...prev,
-            latitude: position.coords.latitude.toString(),
-            longitude: position.coords.longitude.toString(),
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
           }));
         }
       );
     }
   }, [navigate]);
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: 'Error',
+          description: 'Image must be less than 5MB',
+          variant: 'destructive',
+        });
+        return;
+      }
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const handleLocationSelect = (lat: number, lng: number, address: string) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+      address: address,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!userId) {
       toast({
         title: t('addToilet.error'),
@@ -66,19 +100,53 @@ const AddToilet = () => {
       return;
     }
 
+    if (!imageFile) {
+      toast({
+        title: t('addToilet.error'),
+        description: 'Please upload a photo of the toilet location',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (formData.latitude === 0 || formData.longitude === 0) {
+      toast({
+        title: t('addToilet.error'),
+        description: 'Please pin the location on the map',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Upload image first
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('toilet-images')
+        .upload(fileName, imageFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('toilet-images')
+        .getPublicUrl(fileName);
+
+      // Insert toilet data
       const { error } = await supabase.from('toilets').insert({
         name: formData.name,
         address: formData.address,
-        latitude: parseFloat(formData.latitude),
-        longitude: parseFloat(formData.longitude),
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         type: formData.type,
         price: formData.type === 'paid' && formData.price ? parseFloat(formData.price) : null,
         description: formData.description || null,
         opening_hours: formData.opening_hours || null,
         accessibility_features: accessibilityFeatures.length > 0 ? accessibilityFeatures : null,
+        image_url: publicUrl,
         created_by: userId,
       });
 
@@ -145,6 +213,12 @@ const AddToilet = () => {
                 />
               </div>
 
+              <LocationPicker
+                onLocationSelect={handleLocationSelect}
+                initialLat={formData.latitude !== 0 ? formData.latitude : undefined}
+                initialLng={formData.longitude !== 0 ? formData.longitude : undefined}
+              />
+
               <div className="space-y-2">
                 <Label htmlFor="address">{t('addToilet.address')}</Label>
                 <Input
@@ -156,32 +230,46 @@ const AddToilet = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="latitude">{t('addToilet.latitude')}</Label>
-                  <Input
-                    id="latitude"
-                    type="number"
-                    step="any"
-                    placeholder="54.8985"
-                    value={formData.latitude}
-                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="longitude">{t('addToilet.longitude')}</Label>
-                  <Input
-                    id="longitude"
-                    type="number"
-                    step="any"
-                    placeholder="23.9036"
-                    value={formData.longitude}
-                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                    required
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label>Photo Verification (Required)</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Upload a photo of the toilet location to verify its existence
+                </p>
+                {!imagePreview ? (
+                  <div className="relative">
+                    <Input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
+                    <Label
+                      htmlFor="image"
+                      className="flex items-center justify-center gap-2 h-32 border-2 border-dashed rounded-md cursor-pointer hover:border-primary transition-colors"
+                    >
+                      <Upload className="h-6 w-6" />
+                      <span>Click to upload image</span>
+                    </Label>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-48 object-cover rounded-md"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={removeImage}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3">

@@ -23,12 +23,14 @@ interface ToiletMapProps {
   toilets: Toilet[];
   onToiletSelect?: (toilet: Toilet) => void;
   selectedToiletId?: string;
+  directionsTo?: { lat: number; lng: number } | null;
 }
 
-const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId }: ToiletMapProps) => {
+const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo }: ToiletMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const directionsRendererRef = useRef<any>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
@@ -139,6 +141,40 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId }: ToiletMapProps
       googleMapRef.current.setZoom(16);
     }
   }, [selectedToiletId, toilets]);
+
+  useEffect(() => {
+    if (!googleMapRef.current || !window.google || !directionsTo || !userLocation) return;
+
+    // Clear previous directions
+    if (directionsRendererRef.current) {
+      directionsRendererRef.current.setMap(null);
+    }
+
+    // Create new directions renderer
+    directionsRendererRef.current = new window.google.maps.DirectionsRenderer({
+      map: googleMapRef.current,
+      suppressMarkers: false,
+      polylineOptions: {
+        strokeColor: '#0ea5e9',
+        strokeWeight: 4,
+      }
+    });
+
+    // Calculate route
+    const directionsService = new window.google.maps.DirectionsService();
+    directionsService.route(
+      {
+        origin: userLocation,
+        destination: directionsTo,
+        travelMode: window.google.maps.TravelMode.WALKING,
+      },
+      (result: any, status: any) => {
+        if (status === 'OK') {
+          directionsRendererRef.current?.setDirections(result);
+        }
+      }
+    );
+  }, [directionsTo, userLocation]);
 
   return (
     <div ref={mapRef} className="relative w-full h-[400px] bg-secondary rounded-xl overflow-hidden">

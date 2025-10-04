@@ -35,6 +35,7 @@ const Index = () => {
   const [selectedToilet, setSelectedToilet] = useState<any>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [directionsTo, setDirectionsTo] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     // Check authentication
@@ -165,11 +166,11 @@ const Index = () => {
   };
 
   const handleGetDirections = (toilet: any) => {
-    const coords = `${toilet.latitude},${toilet.longitude}`;
-    navigator.clipboard.writeText(coords);
+    setDirectionsTo({ lat: toilet.latitude, lng: toilet.longitude });
+    setDetailsOpen(false);
     toast({
-      title: 'Coordinates Copied!',
-      description: `${coords} - Open your maps app and paste these coordinates`,
+      title: 'Showing Directions',
+      description: 'Route displayed on the map',
     });
   };
 
@@ -290,6 +291,7 @@ const Index = () => {
               toilets={filteredToilets}
               onToiletSelect={setSelectedToilet}
               selectedToiletId={selectedToilet?.id}
+              directionsTo={directionsTo}
             />
             
             {loading && (

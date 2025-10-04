@@ -111,12 +111,12 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
     });
 
     // Add click listener for dropping pins
-    if (onMapClick) {
-      googleMapRef.current.addListener('click', (e: any) => {
+    googleMapRef.current.addListener('click', (e: any) => {
+      if (onMapClick) {
         onMapClick(e.latLng.lat(), e.latLng.lng());
-      });
-    }
-  }, [isMapLoaded, userLocation, onMapClick]);
+      }
+    });
+  }, [isMapLoaded, userLocation]);
 
   useEffect(() => {
     if (!googleMapRef.current || !window.google) return;
@@ -238,8 +238,16 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
         animation: window.google.maps.Animation.DROP,
       });
 
+      // Focus on pinned location with smooth animation
       googleMapRef.current.panTo(pinnedLocation);
       googleMapRef.current.setZoom(15);
+      
+      // Ensure focus by setting center after a brief delay
+      setTimeout(() => {
+        if (googleMapRef.current && pinnedLocation) {
+          googleMapRef.current.setCenter(pinnedLocation);
+        }
+      }, 100);
     }
   }, [pinnedLocation]);
 

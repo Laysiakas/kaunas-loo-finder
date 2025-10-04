@@ -234,41 +234,37 @@ const Index = () => {
     // Detect platform
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
     const isAndroid = /Android/.test(navigator.userAgent);
+    const isMobile = isIOS || isAndroid;
     
-    let url = '';
+    // On desktop, just copy coordinates instead of trying to open Google Maps
+    if (!isMobile) {
+      navigator.clipboard.writeText(destination);
+      toast({
+        title: 'Coordinates Copied',
+        description: `${destination} - Use "Directions" for in-app navigation or paste into your maps app`,
+      });
+      return;
+    }
     
+    // Mobile deep linking
     if (isIOS) {
-      // Try Google Maps app first, fallback to Apple Maps
-      url = `comgooglemaps://?saddr=${origin}&daddr=${destination}&directionsmode=walking`;
+      // Try Google Maps app first
+      const googleMapsUrl = `comgooglemaps://?saddr=${origin}&daddr=${destination}&directionsmode=walking`;
+      window.location.href = googleMapsUrl;
       
-      // Try to open Google Maps app
-      window.location.href = url;
-      
-      // Fallback to Apple Maps after a delay if Google Maps not installed
+      // Fallback to Apple Maps after a delay
       setTimeout(() => {
         window.location.href = `maps://?saddr=${origin}&daddr=${destination}&dirflg=w`;
       }, 500);
     } else if (isAndroid) {
-      // Try Google Maps app navigation
-      url = `google.navigation:q=${destination}&mode=w`;
-      window.location.href = url;
+      // Try Google Maps navigation
+      window.location.href = `google.navigation:q=${destination}&mode=w`;
       
-      // Fallback to geo intent after a delay
+      // Fallback to geo intent
       setTimeout(() => {
         window.location.href = `geo:0,0?q=${destination}(${encodeURIComponent(toilet.name)})`;
       }, 500);
-    } else {
-      // Desktop or web fallback
-      url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=walking`;
-      window.open(url, '_blank');
-      return;
     }
-    
-    // Universal web fallback after 1 second if app doesn't open
-    setTimeout(() => {
-      const webUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=walking`;
-      window.open(webUrl, '_blank');
-    }, 1500);
   };
 
   const copyCoordinates = () => {
@@ -546,7 +542,9 @@ const Index = () => {
                           onClick={() => openInGoogleMaps(selectedToilet)}
                         >
                           <Smartphone className="h-4 w-4" />
-                          Open in Google Maps
+                          {/iPhone|iPad|iPod|Android/.test(navigator.userAgent) 
+                            ? 'Open in Google Maps' 
+                            : 'Copy Coordinates'}
                         </Button>
                       </div>
                     </div>
@@ -630,7 +628,9 @@ const Index = () => {
                       onClick={() => openInGoogleMaps(selectedToilet)}
                     >
                       <Smartphone className="h-4 w-4" />
-                      Open in Google Maps App
+                      {/iPhone|iPad|iPod|Android/.test(navigator.userAgent) 
+                        ? 'Open in Google Maps App' 
+                        : 'Copy Coordinates for Maps App'}
                     </Button>
                   </div>
                 </div>

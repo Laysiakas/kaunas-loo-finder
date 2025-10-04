@@ -22,9 +22,10 @@ interface ToiletCardProps {
   totalReviews?: number;
   onViewDetails?: () => void;
   onGetDirections?: () => void;
+  onNavigateInApp?: () => void;
 }
 
-const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetDirections }: ToiletCardProps) => {
+const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetDirections, onNavigateInApp }: ToiletCardProps) => {
   return (
     <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={onViewDetails}>
       <CardHeader>
@@ -106,20 +107,37 @@ const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetD
         </div>
         
         <div className="flex gap-2 pt-2">
+          {onNavigateInApp && (
+            <Button
+              variant="default"
+              size="sm"
+              className="flex-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigateInApp();
+              }}
+            >
+              <Navigation className="h-4 w-4 mr-1" />
+              Navigate
+            </Button>
+          )}
+          {onGetDirections && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                onGetDirections();
+              }}
+            >
+              <Navigation className="h-4 w-4 mr-1" />
+              Directions
+            </Button>
+          )}
           <Button
+            size="sm"
             variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              onGetDirections?.();
-            }}
-          >
-            <Navigation className="h-4 w-4 mr-1" />
-            Directions
-          </Button>
-          <Button
-            size="sm"
             className="flex-1"
             onClick={(e) => {
               e.stopPropagation();

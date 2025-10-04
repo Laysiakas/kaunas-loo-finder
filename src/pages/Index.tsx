@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy, Clock, ArrowUpDown, X } from 'lucide-react';
+import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy, Clock, ArrowUpDown, X, Smartphone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ToiletMap from '@/components/ToiletMap';
 import ToiletCard from '@/components/ToiletCard';
@@ -218,6 +218,59 @@ const Index = () => {
     setRouteInfo(null);
   };
 
+  const openInGoogleMaps = (toilet: any) => {
+    if (!userLocation) {
+      toast({
+        title: 'Location Required',
+        description: 'Please enable location services',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const destination = `${toilet.latitude},${toilet.longitude}`;
+    const origin = `${userLocation.lat},${userLocation.lng}`;
+    
+    // Detect platform
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    
+    let url = '';
+    
+    if (isIOS) {
+      // Try Google Maps app first, fallback to Apple Maps
+      url = `comgooglemaps://?saddr=${origin}&daddr=${destination}&directionsmode=walking`;
+      
+      // Try to open Google Maps app
+      window.location.href = url;
+      
+      // Fallback to Apple Maps after a delay if Google Maps not installed
+      setTimeout(() => {
+        window.location.href = `maps://?saddr=${origin}&daddr=${destination}&dirflg=w`;
+      }, 500);
+    } else if (isAndroid) {
+      // Try Google Maps app navigation
+      url = `google.navigation:q=${destination}&mode=w`;
+      window.location.href = url;
+      
+      // Fallback to geo intent after a delay
+      setTimeout(() => {
+        window.location.href = `geo:0,0?q=${destination}(${encodeURIComponent(toilet.name)})`;
+      }, 500);
+    } else {
+      // Desktop or web fallback
+      url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=walking`;
+      window.open(url, '_blank');
+      return;
+    }
+    
+    // Universal web fallback after 1 second if app doesn't open
+    setTimeout(() => {
+      const webUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=walking`;
+      window.open(webUrl, '_blank');
+    }, 1500);
+  };
+
   const copyCoordinates = () => {
     if (selectedToilet) {
       const coords = `${selectedToilet.latitude},${selectedToilet.longitude}`;
@@ -384,6 +437,7 @@ const Index = () => {
                         toilet={toilet}
                         onViewDetails={() => handleViewDetails(toilet)}
                         onGetDirections={() => handleGetDirections(toilet)}
+                        onNavigateInApp={() => openInGoogleMaps(toilet)}
                       />
                     ))}
                   </div>
@@ -416,6 +470,7 @@ const Index = () => {
                       toilet={toilet}
                       onViewDetails={() => handleViewDetails(toilet)}
                       onGetDirections={() => handleGetDirections(toilet)}
+                      onNavigateInApp={() => openInGoogleMaps(toilet)}
                     />
                   ))}
                 </div>
@@ -472,7 +527,7 @@ const Index = () => {
                       <div className="flex-1">
                         <p className="font-semibold">{selectedToilet.name}</p>
                         <p className="text-sm text-muted-foreground">{selectedToilet.address}</p>
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
                           <Badge 
                             variant={selectedToilet.type === 'free' ? 'default' : 'secondary'}
                             className={selectedToilet.type === 'free' ? 'bg-success' : 'bg-warning'}
@@ -486,6 +541,13 @@ const Index = () => {
                             </div>
                           )}
                         </div>
+                        <Button 
+                          className="w-full mt-3 gap-2"
+                          onClick={() => openInGoogleMaps(selectedToilet)}
+                        >
+                          <Smartphone className="h-4 w-4" />
+                          Open in Google Maps
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -562,6 +624,13 @@ const Index = () => {
                     >
                       <Navigation2 className="h-4 w-4 mr-2" />
                       Get Directions
+                    </Button>
+                    <Button 
+                      className="w-full gap-2"
+                      onClick={() => openInGoogleMaps(selectedToilet)}
+                    >
+                      <Smartphone className="h-4 w-4" />
+                      Open in Google Maps App
                     </Button>
                   </div>
                 </div>

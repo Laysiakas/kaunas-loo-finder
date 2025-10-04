@@ -21,10 +21,12 @@ const Index = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [toilets, setToilets] = useState<any[]>([]);
+  const [nearbyToilets, setNearbyToilets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'free' | 'paid'>('all');
   const [selectedToilet, setSelectedToilet] = useState<any>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     // Check authentication
@@ -53,8 +55,57 @@ const Index = () => {
   useEffect(() => {
     if (user) {
       fetchToilets();
+      getUserLocation();
     }
   }, [user]);
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserLocation(location);
+          fetchNearbyToilets(location.lat, location.lng);
+        },
+        () => {
+          const defaultLocation = { lat: 54.8985, lng: 23.9036 };
+          setUserLocation(defaultLocation);
+          fetchNearbyToilets(defaultLocation.lat, defaultLocation.lng);
+        }
+      );
+    } else {
+      const defaultLocation = { lat: 54.8985, lng: 23.9036 };
+      setUserLocation(defaultLocation);
+      fetchNearbyToilets(defaultLocation.lat, defaultLocation.lng);
+    }
+  };
+
+  const fetchNearbyToilets = async (latitude: number, longitude: number) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-nearby-toilets', {
+        body: { latitude, longitude, radius: 2000 }
+      });
+
+      if (error) throw error;
+      
+      const formattedToilets = data?.toilets?.map((toilet: any) => ({
+        id: toilet.place_id,
+        name: toilet.name,
+        address: toilet.address,
+        latitude: toilet.latitude,
+        longitude: toilet.longitude,
+        type: 'free',
+        rating: toilet.rating,
+      })) || [];
+      
+      setNearbyToilets(formattedToilets);
+    } catch (error: any) {
+      console.error('Error fetching nearby toilets:', error);
+    }
+  };
 
   const fetchToilets = async () => {
     try {
@@ -83,7 +134,8 @@ const Index = () => {
   };
 
   const getFilteredToilets = () => {
-    let filtered = toilets;
+    const allToilets = [...toilets, ...nearbyToilets];
+    let filtered = allToilets;
 
     if (typeFilter !== 'all') {
       filtered = filtered.filter(t => t.type === typeFilter);

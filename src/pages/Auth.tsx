@@ -8,6 +8,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { MapPin } from 'lucide-react';
+import { z } from 'zod';
+
+// Validation schemas
+const signUpSchema = z.object({
+  username: z.string()
+    .trim()
+    .min(3, 'Username must be at least 3 characters')
+    .max(30, 'Username must be less than 30 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+  email: z.string()
+    .trim()
+    .email('Invalid email address')
+    .max(255, 'Email must be less than 255 characters'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(100, 'Password must be less than 100 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one lowercase letter, one uppercase letter, and one number'),
+});
+
+const signInSchema = z.object({
+  email: z.string()
+    .trim()
+    .email('Invalid email address')
+    .max(255, 'Email must be less than 255 characters'),
+  password: z.string()
+    .min(1, 'Password is required'),
+});
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -33,12 +60,30 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate inputs
+      const validationResult = signUpSchema.safeParse({
+        username: username,
+        email: email,
+        password: password,
+      });
+
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast({
+          title: 'Validation Error',
+          description: firstError.message,
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: validationResult.data.email,
+        password: validationResult.data.password,
         options: {
           data: {
-            username,
+            username: validationResult.data.username,
           },
           emailRedirectTo: `${window.location.origin}/`,
         },
@@ -71,9 +116,26 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate inputs
+      const validationResult = signInSchema.safeParse({
+        email: email,
+        password: password,
+      });
+
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast({
+          title: 'Validation Error',
+          description: firstError.message,
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: validationResult.data.email,
+        password: validationResult.data.password,
       });
 
       if (error) throw error;

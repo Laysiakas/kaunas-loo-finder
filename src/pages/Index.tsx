@@ -129,7 +129,10 @@ const Index = () => {
       
       setNearbyToilets(formattedToilets);
     } catch (error: any) {
-      console.error('Error fetching nearby toilets:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error fetching nearby toilets:', error);
+      }
+      // User-friendly error handling could be added here with toast
     }
   };
 
@@ -256,7 +259,9 @@ const Index = () => {
         }
       });
     } catch (error) {
-      console.error('Geocoding error:', error);
+      if (import.meta.env.DEV) {
+        console.error('Geocoding error:', error);
+      }
     }
   };
 

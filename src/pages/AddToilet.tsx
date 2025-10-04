@@ -118,6 +118,64 @@ const AddToilet = () => {
       return;
     }
 
+    // Validate input data
+    if (formData.name.trim().length === 0 || formData.name.length > 200) {
+      toast({
+        title: t('addToilet.error'),
+        description: 'Name must be between 1 and 200 characters',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (formData.address.trim().length === 0 || formData.address.length > 500) {
+      toast({
+        title: t('addToilet.error'),
+        description: 'Address must be between 1 and 500 characters',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (formData.latitude < -90 || formData.latitude > 90 || formData.longitude < -180 || formData.longitude > 180) {
+      toast({
+        title: t('addToilet.error'),
+        description: 'Invalid coordinates',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (formData.description && formData.description.length > 1000) {
+      toast({
+        title: t('addToilet.error'),
+        description: 'Description must be less than 1000 characters',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (formData.opening_hours && formData.opening_hours.length > 100) {
+      toast({
+        title: t('addToilet.error'),
+        description: 'Opening hours must be less than 100 characters',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (formData.type === 'paid' && formData.price) {
+      const price = parseFloat(formData.price);
+      if (isNaN(price) || price < 0 || price > 1000) {
+        toast({
+          title: t('addToilet.error'),
+          description: 'Price must be between 0 and 1000',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {

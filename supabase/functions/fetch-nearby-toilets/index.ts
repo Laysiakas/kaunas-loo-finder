@@ -55,7 +55,10 @@ async function fetchOSMToilets(lat: number, lng: number, radius: number): Promis
       source: 'osm' as const,
     })).filter((t: Toilet) => t.latitude && t.longitude);
   } catch (error) {
-    console.error('OSM fetch error:', error);
+    // Only log in development/testing - errors are handled gracefully
+    if (Deno.env.get('DENO_DEPLOYMENT_ID')) {
+      console.error('OSM fetch error:', error);
+    }
     return [];
   }
 }
@@ -84,7 +87,10 @@ async function fetchGoogleToilets(lat: number, lng: number, radius: number): Pro
       source: 'google' as const,
     }));
   } catch (error) {
-    console.error('Google Maps fetch error:', error);
+    // Only log in development/testing - errors are handled gracefully
+    if (Deno.env.get('DENO_DEPLOYMENT_ID')) {
+      console.error('Google Maps fetch error:', error);
+    }
     return [];
   }
 }
@@ -96,6 +102,24 @@ serve(async (req) => {
 
   try {
     const { latitude, longitude, radius = 5000 }: NearbySearchRequest = await req.json();
+
+    // Validate coordinates
+    if (!latitude || !longitude || 
+        latitude < -90 || latitude > 90 ||
+        longitude < -180 || longitude > 180) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid coordinates. Latitude must be between -90 and 90, longitude between -180 and 180.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate radius
+    if (radius < 100 || radius > 50000) {
+      return new Response(
+        JSON.stringify({ error: 'Radius must be between 100 and 50000 meters.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Fetch from multiple sources in parallel
     const [osmToilets, googleToilets] = await Promise.all([

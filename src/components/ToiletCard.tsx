@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { MapPin, Star, Navigation, Euro, Clock, Accessibility, MapPinned } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +27,8 @@ interface ToiletCardProps {
 }
 
 const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetDirections, onNavigateInApp }: ToiletCardProps) => {
+  const { t } = useTranslation();
+  
   return (
     <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={onViewDetails}>
       <CardHeader>
@@ -41,7 +44,7 @@ const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetD
             variant={toilet.type === 'free' ? 'default' : 'secondary'}
             className={toilet.type === 'free' ? 'bg-success hover:bg-success/90' : 'bg-warning hover:bg-warning/90'}
           >
-            {toilet.type === 'free' ? 'Free' : `€${toilet.price}`}
+            {toilet.type === 'free' ? t('toilet.free') : `€${toilet.price}`}
           </Badge>
         </div>
       </CardHeader>
@@ -78,8 +81,8 @@ const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetD
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <MapPinned className="h-3 w-3" />
               {toilet.distance < 1 
-                ? `${(toilet.distance * 1000).toFixed(0)}m away`
-                : `${toilet.distance.toFixed(1)}km away`
+                ? t('toilet.distance.meters', { distance: (toilet.distance * 1000).toFixed(0) })
+                : t('toilet.distance.km', { distance: toilet.distance.toFixed(1) })
               }
             </div>
           )}
@@ -98,10 +101,10 @@ const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetD
             </div>
           )}
           
-          {toilet.accessibility_features && toilet.accessibility_features.length > 0 && (
+           {toilet.accessibility_features && toilet.accessibility_features.length > 0 && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Accessibility className="h-3 w-3" />
-              Accessible
+              {t('details.accessible')}
             </div>
           )}
         </div>
@@ -118,7 +121,7 @@ const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetD
               }}
             >
               <Navigation className="h-4 w-4 mr-1" />
-              Navigate
+              {t('toilet.navigate')}
             </Button>
           )}
           {onGetDirections && (
@@ -132,7 +135,7 @@ const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetD
               }}
             >
               <Navigation className="h-4 w-4 mr-1" />
-              Directions
+              {t('toilet.directions')}
             </Button>
           )}
           <Button
@@ -144,7 +147,7 @@ const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetD
               onViewDetails?.();
             }}
           >
-            View Details
+            {t('toilet.viewDetails')}
           </Button>
         </div>
       </CardContent>

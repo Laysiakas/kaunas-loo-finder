@@ -437,14 +437,14 @@ const Index = () => {
               
               {!loading && filteredToilets.length === 0 && (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">No toilets found</p>
+                  <p className="text-muted-foreground">{t('search.noResults')}</p>
                 </div>
               )}
               
               {!loading && filteredToilets.length > 0 && (
                 <div className="space-y-3">
                   <h2 className="text-lg font-semibold">
-                    Nearby Toilets ({filteredToilets.length})
+                    {t('toilet.nearby')} ({filteredToilets.length})
                   </h2>
                   <div className="grid gap-3">
                     {filteredToilets.slice(0, 5).map((toilet) => (
@@ -470,10 +470,10 @@ const Index = () => {
               
               {!loading && filteredToilets.length === 0 && (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">No toilets found</p>
+                  <p className="text-muted-foreground">{t('search.noResults')}</p>
                   <Button onClick={() => navigate('/add-toilet')} className="mt-4">
                     <Plus className="h-4 w-4 mr-2" />
-                    Add First Toilet
+                    {t('toilet.addFirst')}
                   </Button>
                 </div>
               )}
@@ -604,21 +604,21 @@ const Index = () => {
               <div className="mt-6 space-y-6">
                 {selectedToilet.description && (
                   <div>
-                    <h3 className="font-semibold mb-2">Description</h3>
+                    <h3 className="font-semibold mb-2">{t('details.description')}</h3>
                     <p className="text-muted-foreground">{selectedToilet.description}</p>
                   </div>
                 )}
 
                 {selectedToilet.opening_hours && (
                   <div>
-                    <h3 className="font-semibold mb-2">Opening Hours</h3>
+                    <h3 className="font-semibold mb-2">{t('details.openingHours')}</h3>
                     <p className="text-muted-foreground">{selectedToilet.opening_hours}</p>
                   </div>
                 )}
 
                 {selectedToilet.accessibility_features && selectedToilet.accessibility_features.length > 0 && (
                   <div>
-                    <h3 className="font-semibold mb-2">Accessibility Features</h3>
+                    <h3 className="font-semibold mb-2">{t('details.accessibilityFeatures')}</h3>
                     <div className="flex flex-wrap gap-2">
                       {selectedToilet.accessibility_features.map((feature: string, idx: number) => (
                         <Badge key={idx} variant="outline">{feature}</Badge>
@@ -628,12 +628,12 @@ const Index = () => {
                 )}
 
                 <div>
-                  <h3 className="font-semibold mb-2">Location</h3>
+                  <h3 className="font-semibold mb-2">{t('details.location')}</h3>
                   <div className="space-y-2">
                     <div className="p-3 bg-muted rounded-lg">
                       <p className="text-sm font-medium mb-1">{selectedToilet.address}</p>
                       <p className="text-xs text-muted-foreground">
-                        Coordinates: {selectedToilet.latitude.toFixed(6)}, {selectedToilet.longitude.toFixed(6)}
+                        {t('details.coordinates')}: {selectedToilet.latitude.toFixed(6)}, {selectedToilet.longitude.toFixed(6)}
                       </p>
                     </div>
                     <Button 
@@ -642,14 +642,14 @@ const Index = () => {
                       onClick={copyCoordinates}
                     >
                       <Copy className="h-4 w-4 mr-2" />
-                      Copy Full Address & Coordinates
+                      {t('details.copyFullAddress')}
                     </Button>
                     <Button 
                       className="w-full"
                       onClick={() => handleGetDirections(selectedToilet)}
                     >
                       <Navigation2 className="h-4 w-4 mr-2" />
-                      Get Directions
+                      {t('navigation.getDirections')}
                     </Button>
                     <Button 
                       className="w-full gap-2"
@@ -657,10 +657,10 @@ const Index = () => {
                     >
                       <Smartphone className="h-4 w-4" />
                       {/iPhone|iPad|iPod/.test(navigator.userAgent) 
-                        ? 'Open in Apple Maps' 
+                        ? t('navigation.openInAppleMaps')
                         : /Android/.test(navigator.userAgent)
-                        ? 'Open in Google Maps'
-                        : 'Copy Coordinates for Maps App'}
+                        ? t('navigation.openInGoogleMaps')
+                        : t('navigation.copyCoordinates')}
                     </Button>
                   </div>
                 </div>

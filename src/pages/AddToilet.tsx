@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 const AddToilet = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -57,7 +59,7 @@ const AddToilet = () => {
     e.preventDefault();
     if (!userId) {
       toast({
-        title: 'Error',
+        title: t('addToilet.error'),
         description: 'You must be logged in to add a toilet',
         variant: 'destructive',
       });
@@ -83,14 +85,14 @@ const AddToilet = () => {
       if (error) throw error;
 
       toast({
-        title: 'Success!',
-        description: 'Toilet added successfully.',
+        title: t('addToilet.success'),
+        description: t('addToilet.toiletAdded'),
       });
 
       navigate('/');
     } catch (error: any) {
       toast({
-        title: 'Error',
+        title: t('addToilet.error'),
         description: error.message,
         variant: 'destructive',
       });
@@ -116,7 +118,7 @@ const AddToilet = () => {
           </Button>
           <div className="flex items-center gap-2">
             <MapPin className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">Add New Toilet</h1>
+            <h1 className="text-xl font-bold">{t('addToilet.title')}</h1>
           </div>
         </div>
       </header>
@@ -124,19 +126,19 @@ const AddToilet = () => {
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <Card>
           <CardHeader>
-            <CardTitle>Toilet Information</CardTitle>
+            <CardTitle>{t('addToilet.title')}</CardTitle>
             <CardDescription>
-              Help others find this toilet by providing accurate information
+              {t('addToilet.title')}
             </CardDescription>
           </CardHeader>
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="name">{t('addToilet.name')}</Label>
                 <Input
                   id="name"
-                  placeholder="e.g., City Center Public Toilet"
+                  placeholder={t('addToilet.namePlaceholder')}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
@@ -144,10 +146,10 @@ const AddToilet = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Address *</Label>
+                <Label htmlFor="address">{t('addToilet.address')}</Label>
                 <Input
                   id="address"
-                  placeholder="e.g., Laisvės alėja 55, Kaunas"
+                  placeholder={t('addToilet.addressPlaceholder')}
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   required
@@ -156,7 +158,7 @@ const AddToilet = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="latitude">Latitude *</Label>
+                  <Label htmlFor="latitude">{t('addToilet.latitude')}</Label>
                   <Input
                     id="latitude"
                     type="number"
@@ -169,7 +171,7 @@ const AddToilet = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="longitude">Longitude *</Label>
+                  <Label htmlFor="longitude">{t('addToilet.longitude')}</Label>
                   <Input
                     id="longitude"
                     type="number"
@@ -183,30 +185,30 @@ const AddToilet = () => {
               </div>
 
               <div className="space-y-3">
-                <Label>Type *</Label>
+                <Label>{t('addToilet.type')}</Label>
                 <RadioGroup
                   value={formData.type}
                   onValueChange={(value: 'free' | 'paid') => setFormData({ ...formData, type: value })}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="free" id="free" />
-                    <Label htmlFor="free" className="font-normal cursor-pointer">Free</Label>
+                    <Label htmlFor="free" className="font-normal cursor-pointer">{t('filter.free')}</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="paid" id="paid" />
-                    <Label htmlFor="paid" className="font-normal cursor-pointer">Paid</Label>
+                    <Label htmlFor="paid" className="font-normal cursor-pointer">{t('filter.paid')}</Label>
                   </div>
                 </RadioGroup>
               </div>
 
               {formData.type === 'paid' && (
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price (€)</Label>
+                  <Label htmlFor="price">{t('addToilet.price')}</Label>
                   <Input
                     id="price"
                     type="number"
                     step="0.01"
-                    placeholder="0.50"
+                    placeholder={t('addToilet.pricePlaceholder')}
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   />
@@ -214,10 +216,10 @@ const AddToilet = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('addToilet.description')}</Label>
                 <Textarea
                   id="description"
-                  placeholder="Any additional information about this toilet..."
+                  placeholder={t('addToilet.descriptionPlaceholder')}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
@@ -225,17 +227,17 @@ const AddToilet = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="opening_hours">Opening Hours</Label>
+                <Label htmlFor="opening_hours">{t('addToilet.openingHours')}</Label>
                 <Input
                   id="opening_hours"
-                  placeholder="e.g., 24/7 or Mon-Fri 8:00-20:00"
+                  placeholder={t('addToilet.openingHoursPlaceholder')}
                   value={formData.opening_hours}
                   onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
                 />
               </div>
 
               <div className="space-y-3">
-                <Label>Accessibility Features</Label>
+                <Label>{t('addToilet.accessibility')}</Label>
                 <div className="space-y-2">
                   {['Wheelchair accessible', 'Handrails', 'Baby changing station', 'Wide door'].map((feature) => (
                     <div key={feature} className="flex items-center space-x-2">
@@ -259,10 +261,10 @@ const AddToilet = () => {
                   onClick={() => navigate('/')}
                   className="flex-1"
                 >
-                  Cancel
+                  {t('addToilet.cancel')}
                 </Button>
                 <Button type="submit" disabled={loading} className="flex-1">
-                  {loading ? 'Adding...' : 'Add Toilet'}
+                  {loading ? `${t('loading.loading')}` : t('addToilet.submit')}
                 </Button>
               </div>
             </form>

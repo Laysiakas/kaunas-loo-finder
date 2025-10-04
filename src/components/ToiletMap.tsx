@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -34,6 +35,7 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
   const directionsRendererRef = useRef<any>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -202,7 +204,7 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center space-y-2">
             <MapPin className="h-12 w-12 text-primary mx-auto animate-pulse" />
-            <p className="text-sm text-muted-foreground">Loading map...</p>
+            <p className="text-sm text-muted-foreground">{t('loading.map')}</p>
           </div>
         </div>
       )}

@@ -375,16 +375,16 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden w-full max-w-full">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">{t('app.name')}</h1>
+      <header className="sticky top-0 z-50 bg-card border-b shadow-sm w-full">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-full">
+          <div className="flex items-center gap-2 min-w-0 flex-shrink">
+            <MapPin className="h-6 w-6 text-primary flex-shrink-0" />
+            <h1 className="text-lg sm:text-xl font-bold truncate">{t('app.name')}</h1>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <LanguageSwitcher />
             
             <Button
@@ -414,7 +414,7 @@ const Index = () => {
       </header>
 
       {/* Search and Filter */}
-      <div className="container mx-auto px-4 py-4 space-y-3">
+      <div className="container mx-auto px-4 py-4 space-y-3 max-w-full overflow-x-hidden">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -472,7 +472,7 @@ const Index = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 pb-6">
+      <div className="container mx-auto px-4 pb-6 max-w-full overflow-x-hidden">
         {!directionsTo ? (
           <Tabs defaultValue="map" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -548,7 +548,7 @@ const Index = () => {
               
               {!loading && filteredToilets.length > 0 && (
                 <div className="space-y-3">
-                  <h2 className="text-lg font-semibold">
+                  <h2 className="text-base sm:text-lg font-semibold break-words">
                     {pinnedLocation 
                       ? `${t('toilet.within5km')} (${filteredToilets.length})`
                       : `${t('toilet.nearby')} (${filteredToilets.length})`

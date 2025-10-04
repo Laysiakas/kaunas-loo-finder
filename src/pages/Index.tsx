@@ -336,19 +336,99 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 pb-6">
-        <Tabs defaultValue="map" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="map" className="gap-2">
-              <MapPin className="h-4 w-4" />
-              Map
-            </TabsTrigger>
-            <TabsTrigger value="list" className="gap-2">
-              <List className="h-4 w-4" />
-              List
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="map" className="space-y-4">
+        {!directionsTo ? (
+          <Tabs defaultValue="map" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="map" className="gap-2">
+                <MapPin className="h-4 w-4" />
+                Map
+              </TabsTrigger>
+              <TabsTrigger value="list" className="gap-2">
+                <List className="h-4 w-4" />
+                List
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="map" className="space-y-4">
+              <ToiletMap
+                toilets={filteredToilets}
+                onToiletSelect={setSelectedToilet}
+                selectedToiletId={selectedToilet?.id}
+                directionsTo={directionsTo}
+                onDirectionsCalculated={(duration, distance) => {
+                  setRouteInfo({ duration, distance });
+                }}
+              />
+              
+              {loading && (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                </div>
+              )}
+              
+              {!loading && filteredToilets.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No toilets found</p>
+                </div>
+              )}
+              
+              {!loading && filteredToilets.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-lg font-semibold">
+                    Nearby Toilets ({filteredToilets.length})
+                  </h2>
+                  <div className="grid gap-3">
+                    {filteredToilets.slice(0, 5).map((toilet) => (
+                      <ToiletCard
+                        key={toilet.id}
+                        toilet={toilet}
+                        onViewDetails={() => handleViewDetails(toilet)}
+                        onGetDirections={() => handleGetDirections(toilet)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="list" className="space-y-3">
+              {loading && (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                </div>
+              )}
+              
+              {!loading && filteredToilets.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No toilets found</p>
+                  <Button onClick={() => navigate('/add-toilet')} className="mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add First Toilet
+                  </Button>
+                </div>
+              )}
+              
+              {!loading && filteredToilets.length > 0 && (
+                <div className="grid gap-3">
+                  {filteredToilets.map((toilet) => (
+                    <ToiletCard
+                      key={toilet.id}
+                      toilet={toilet}
+                      onViewDetails={() => handleViewDetails(toilet)}
+                      onGetDirections={() => handleGetDirections(toilet)}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        ) : null}
+      </div>
+
+      {/* Full Screen Navigation Mode */}
+      {directionsTo && (
+        <div className="fixed inset-0 z-50 bg-background">
+          <div className="absolute inset-0">
             <ToiletMap
               toilets={filteredToilets}
               onToiletSelect={setSelectedToilet}
@@ -358,116 +438,63 @@ const Index = () => {
                 setRouteInfo({ duration, distance });
               }}
             />
+          </div>
 
-            {/* Navigation Panel - Google Maps style */}
-            {routeInfo && directionsTo && selectedToilet && (
-              <div className="bg-card border rounded-xl shadow-xl overflow-hidden">
-                <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Navigation2 className="h-5 w-5" />
-                    <div>
-                      <p className="font-bold text-lg">{routeInfo.duration}</p>
-                      <p className="text-xs opacity-90">{routeInfo.distance}</p>
+          {/* Navigation Info Panel - Floating at Bottom */}
+          {routeInfo && selectedToilet && (
+            <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
+              <div className="relative">
+                {/* Blur backdrop */}
+                <div className="absolute inset-0 bg-background/40 backdrop-blur-sm" />
+                
+                <div className="relative pointer-events-auto">
+                  <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Navigation2 className="h-5 w-5" />
+                      <div>
+                        <p className="font-bold text-lg">{routeInfo.duration}</p>
+                        <p className="text-xs opacity-90">{routeInfo.distance} • Walking</p>
+                      </div>
                     </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={handleCancelNavigation}
+                      className="text-primary-foreground hover:bg-primary-foreground/20"
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={handleCancelNavigation}
-                    className="text-primary-foreground hover:bg-primary-foreground/20"
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold">{selectedToilet.name}</p>
-                      <p className="text-sm text-muted-foreground">{selectedToilet.address}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge 
-                          variant={selectedToilet.type === 'free' ? 'default' : 'secondary'}
-                          className={selectedToilet.type === 'free' ? 'bg-success' : 'bg-warning'}
-                        >
-                          {selectedToilet.type === 'free' ? 'Free' : `€${selectedToilet.price}`}
-                        </Badge>
-                        {selectedToilet.rating && selectedToilet.rating > 0 && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Star className="h-3 w-3 fill-warning text-warning" />
-                            <span>{selectedToilet.rating.toFixed(1)}</span>
-                          </div>
-                        )}
+                  
+                  <div className="bg-card/95 backdrop-blur-md p-4 border-t">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold">{selectedToilet.name}</p>
+                        <p className="text-sm text-muted-foreground">{selectedToilet.address}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge 
+                            variant={selectedToilet.type === 'free' ? 'default' : 'secondary'}
+                            className={selectedToilet.type === 'free' ? 'bg-success' : 'bg-warning'}
+                          >
+                            {selectedToilet.type === 'free' ? 'Free' : `€${selectedToilet.price}`}
+                          </Badge>
+                          {selectedToilet.rating && selectedToilet.rating > 0 && (
+                            <div className="flex items-center gap-1 text-sm">
+                              <Star className="h-3 w-3 fill-warning text-warning" />
+                              <span>{selectedToilet.rating.toFixed(1)}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            )}
-            
-            {loading && (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-              </div>
-            )}
-            
-            {!loading && filteredToilets.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No toilets found</p>
-              </div>
-            )}
-            
-            {!loading && filteredToilets.length > 0 && (
-              <div className="space-y-3">
-                <h2 className="text-lg font-semibold">
-                  Nearby Toilets ({filteredToilets.length})
-                </h2>
-                <div className="grid gap-3">
-                  {filteredToilets.slice(0, 5).map((toilet) => (
-                    <ToiletCard
-                      key={toilet.id}
-                      toilet={toilet}
-                      onViewDetails={() => handleViewDetails(toilet)}
-                      onGetDirections={() => handleGetDirections(toilet)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="list" className="space-y-3">
-            {loading && (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-              </div>
-            )}
-            
-            {!loading && filteredToilets.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No toilets found</p>
-                <Button onClick={() => navigate('/add-toilet')} className="mt-4">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Toilet
-                </Button>
-              </div>
-            )}
-            
-            {!loading && filteredToilets.length > 0 && (
-              <div className="grid gap-3">
-                {filteredToilets.map((toilet) => (
-                  <ToiletCard
-                    key={toilet.id}
-                    toilet={toilet}
-                    onViewDetails={() => handleViewDetails(toilet)}
-                    onGetDirections={() => handleGetDirections(toilet)}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Toilet Details Sheet */}
       <Sheet open={detailsOpen} onOpenChange={setDetailsOpen}>

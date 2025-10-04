@@ -272,11 +272,11 @@ const Index = () => {
 
   const copyCoordinates = () => {
     if (selectedToilet) {
-      const coords = `${selectedToilet.latitude},${selectedToilet.longitude}`;
-      navigator.clipboard.writeText(coords);
+      const locationInfo = `${selectedToilet.name}\n${selectedToilet.address}\nCoordinates: ${selectedToilet.latitude},${selectedToilet.longitude}`;
+      navigator.clipboard.writeText(locationInfo);
       toast({
-        title: 'Coordinates Copied!',
-        description: coords,
+        title: 'Location Copied!',
+        description: 'Address and coordinates copied to clipboard',
       });
     }
   };
@@ -613,13 +613,19 @@ const Index = () => {
                 <div>
                   <h3 className="font-semibold mb-2">Location</h3>
                   <div className="space-y-2">
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-sm font-medium mb-1">{selectedToilet.address}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Coordinates: {selectedToilet.latitude.toFixed(6)}, {selectedToilet.longitude.toFixed(6)}
+                      </p>
+                    </div>
                     <Button 
                       variant="outline" 
                       className="w-full justify-start"
                       onClick={copyCoordinates}
                     >
                       <Copy className="h-4 w-4 mr-2" />
-                      Copy Coordinates: {selectedToilet.latitude.toFixed(6)}, {selectedToilet.longitude.toFixed(6)}
+                      Copy Full Address & Coordinates
                     </Button>
                     <Button 
                       className="w-full"

@@ -175,22 +175,23 @@ const Index = () => {
     // Use pinned location for distance calculation if available, otherwise use user location
     const referenceLocation = pinnedLocation || userLocation;
     
+    if (!referenceLocation) return [];
+
     const allToilets = [...toilets, ...nearbyToilets].map(toilet => {
-      if (!toilet.distance && referenceLocation) {
-        return {
-          ...toilet,
-          distance: calculateDistance(
-            referenceLocation.lat,
-            referenceLocation.lng,
-            toilet.latitude,
-            toilet.longitude
-          )
-        };
-      }
-      return toilet;
+      const distance = calculateDistance(
+        referenceLocation.lat,
+        referenceLocation.lng,
+        toilet.latitude,
+        toilet.longitude
+      );
+      return {
+        ...toilet,
+        distance
+      };
     });
 
-    let filtered = allToilets;
+    // Filter to only show toilets within 5km radius
+    let filtered = allToilets.filter(t => (t.distance || 0) <= 5);
 
     if (typeFilter !== 'all') {
       filtered = filtered.filter(t => t.type === typeFilter);

@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, List, Plus, Search, User, LogOut, Filter } from 'lucide-react';
+import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ToiletMap from '@/components/ToiletMap';
 import ToiletCard from '@/components/ToiletCard';
@@ -14,6 +14,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 
 const Index = () => {
@@ -27,6 +34,7 @@ const Index = () => {
   const [typeFilter, setTypeFilter] = useState<'all' | 'free' | 'paid'>('all');
   const [selectedToilet, setSelectedToilet] = useState<any>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => {
     // Check authentication
@@ -149,6 +157,31 @@ const Index = () => {
     }
 
     return filtered;
+  };
+
+  const handleViewDetails = (toilet: any) => {
+    setSelectedToilet(toilet);
+    setDetailsOpen(true);
+  };
+
+  const handleGetDirections = (toilet: any) => {
+    const coords = `${toilet.latitude},${toilet.longitude}`;
+    navigator.clipboard.writeText(coords);
+    toast({
+      title: 'Coordinates Copied!',
+      description: `${coords} - Open your maps app and paste these coordinates`,
+    });
+  };
+
+  const copyCoordinates = () => {
+    if (selectedToilet) {
+      const coords = `${selectedToilet.latitude},${selectedToilet.longitude}`;
+      navigator.clipboard.writeText(coords);
+      toast({
+        title: 'Coordinates Copied!',
+        description: coords,
+      });
+    }
   };
 
   const filteredToilets = getFilteredToilets();
@@ -281,12 +314,8 @@ const Index = () => {
                     <ToiletCard
                       key={toilet.id}
                       toilet={toilet}
-                      onGetDirections={() => {
-                        window.open(
-                          `https://www.google.com/maps/dir/?api=1&destination=${toilet.latitude},${toilet.longitude}`,
-                          '_blank'
-                        );
-                      }}
+                      onViewDetails={() => handleViewDetails(toilet)}
+                      onGetDirections={() => handleGetDirections(toilet)}
                     />
                   ))}
                 </div>
@@ -317,12 +346,8 @@ const Index = () => {
                   <ToiletCard
                     key={toilet.id}
                     toilet={toilet}
-                    onGetDirections={() => {
-                      window.open(
-                        `https://www.google.com/maps/dir/?api=1&destination=${toilet.latitude},${toilet.longitude}`,
-                        '_blank'
-                      );
-                    }}
+                    onViewDetails={() => handleViewDetails(toilet)}
+                    onGetDirections={() => handleGetDirections(toilet)}
                   />
                 ))}
               </div>
@@ -330,6 +355,81 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Toilet Details Sheet */}
+      <Sheet open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <SheetContent side="bottom" className="h-[85vh] overflow-y-auto">
+          {selectedToilet && (
+            <>
+              <SheetHeader>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <SheetTitle className="text-2xl">{selectedToilet.name}</SheetTitle>
+                    <SheetDescription className="flex items-center gap-1 mt-2">
+                      <MapPin className="h-4 w-4" />
+                      {selectedToilet.address}
+                    </SheetDescription>
+                  </div>
+                  <Badge 
+                    variant={selectedToilet.type === 'free' ? 'default' : 'secondary'}
+                    className={selectedToilet.type === 'free' ? 'bg-success text-lg px-4 py-2' : 'bg-warning text-lg px-4 py-2'}
+                  >
+                    {selectedToilet.type === 'free' ? 'Free' : `€${selectedToilet.price}`}
+                  </Badge>
+                </div>
+              </SheetHeader>
+
+              <div className="mt-6 space-y-6">
+                {selectedToilet.description && (
+                  <div>
+                    <h3 className="font-semibold mb-2">Description</h3>
+                    <p className="text-muted-foreground">{selectedToilet.description}</p>
+                  </div>
+                )}
+
+                {selectedToilet.opening_hours && (
+                  <div>
+                    <h3 className="font-semibold mb-2">Opening Hours</h3>
+                    <p className="text-muted-foreground">{selectedToilet.opening_hours}</p>
+                  </div>
+                )}
+
+                {selectedToilet.accessibility_features && selectedToilet.accessibility_features.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold mb-2">Accessibility Features</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedToilet.accessibility_features.map((feature: string, idx: number) => (
+                        <Badge key={idx} variant="outline">{feature}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <h3 className="font-semibold mb-2">Location</h3>
+                  <div className="space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={copyCoordinates}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy Coordinates: {selectedToilet.latitude.toFixed(6)}, {selectedToilet.longitude.toFixed(6)}
+                    </Button>
+                    <Button 
+                      className="w-full"
+                      onClick={() => handleGetDirections(selectedToilet)}
+                    >
+                      <Navigation2 className="h-4 w-4 mr-2" />
+                      Get Directions
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

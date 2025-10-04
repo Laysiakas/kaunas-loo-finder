@@ -172,13 +172,16 @@ const Index = () => {
   };
 
   const getFilteredToilets = () => {
+    // Use pinned location for distance calculation if available, otherwise use user location
+    const referenceLocation = pinnedLocation || userLocation;
+    
     const allToilets = [...toilets, ...nearbyToilets].map(toilet => {
-      if (!toilet.distance && userLocation) {
+      if (!toilet.distance && referenceLocation) {
         return {
           ...toilet,
           distance: calculateDistance(
-            userLocation.lat,
-            userLocation.lng,
+            referenceLocation.lat,
+            referenceLocation.lng,
             toilet.latitude,
             toilet.longitude
           )

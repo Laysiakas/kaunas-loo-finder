@@ -32,6 +32,7 @@
     "directions": "Nuorodos",
     "viewDetails": "Peržiūrėti detales",
     "nearby": "Tualetai netoliese",
+    "within5km": "Tualetai 5km spinduliu",
     "addFirst": "Pridėti pirmą tualetą",
     "distance": {
       "meters": "{{distance}}m atstumu",

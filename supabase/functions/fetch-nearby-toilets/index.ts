@@ -10,7 +10,7 @@ const corsHeaders = {
 interface NearbySearchRequest {
   latitude: number;
   longitude: number;
-  radius?: number;
+  radius?: number; // in meters, default 5000 (5km)
 }
 
 interface Toilet {
@@ -95,7 +95,7 @@ serve(async (req) => {
   }
 
   try {
-    const { latitude, longitude, radius = 2000 }: NearbySearchRequest = await req.json();
+    const { latitude, longitude, radius = 5000 }: NearbySearchRequest = await req.json();
 
     // Fetch from multiple sources in parallel
     const [osmToilets, googleToilets] = await Promise.all([

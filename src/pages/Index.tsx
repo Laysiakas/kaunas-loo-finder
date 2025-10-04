@@ -106,7 +106,7 @@ const Index = () => {
   const fetchNearbyToilets = async (latitude: number, longitude: number) => {
     try {
       const { data, error } = await supabase.functions.invoke('fetch-nearby-toilets', {
-        body: { latitude, longitude, radius: 2000 }
+        body: { latitude, longitude, radius: 5000 } // 5km radius
       });
 
       if (error) throw error;
@@ -210,8 +210,8 @@ const Index = () => {
       filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
 
-    // Return only closest 5 toilets
-    return filtered.slice(0, 5);
+    // Return all toilets within radius (no limit)
+    return filtered;
   };
 
   const handleViewDetails = (toilet: any) => {
@@ -540,10 +540,13 @@ const Index = () => {
               {!loading && filteredToilets.length > 0 && (
                 <div className="space-y-3">
                   <h2 className="text-lg font-semibold">
-                    {t('toilet.nearby')} ({filteredToilets.length})
+                    {pinnedLocation 
+                      ? `${t('toilet.within5km')} (${filteredToilets.length})`
+                      : `${t('toilet.nearby')} (${filteredToilets.length})`
+                    }
                   </h2>
-                  <div className="grid gap-3">
-                    {filteredToilets.slice(0, 5).map((toilet) => (
+                  <div className="grid gap-3 max-h-[600px] overflow-y-auto pr-2">
+                    {filteredToilets.map((toilet) => (
                       <ToiletCard
                         key={toilet.id}
                         toilet={toilet}
@@ -575,16 +578,24 @@ const Index = () => {
               )}
               
               {!loading && filteredToilets.length > 0 && (
-                <div className="grid gap-3">
-                  {filteredToilets.map((toilet) => (
-                    <ToiletCard
-                      key={toilet.id}
-                      toilet={toilet}
-                      onViewDetails={() => handleViewDetails(toilet)}
-                      onGetDirections={() => handleGetDirections(toilet)}
-                      onNavigateInApp={() => openInGoogleMaps(toilet)}
-                    />
-                  ))}
+                <div className="space-y-3">
+                  <h2 className="text-lg font-semibold">
+                    {pinnedLocation 
+                      ? `${t('toilet.within5km')} (${filteredToilets.length})`
+                      : `${t('toilet.nearby')} (${filteredToilets.length})`
+                    }
+                  </h2>
+                  <div className="grid gap-3 max-h-[700px] overflow-y-auto pr-2">
+                    {filteredToilets.map((toilet) => (
+                      <ToiletCard
+                        key={toilet.id}
+                        toilet={toilet}
+                        onViewDetails={() => handleViewDetails(toilet)}
+                        onGetDirections={() => handleGetDirections(toilet)}
+                        onNavigateInApp={() => openInGoogleMaps(toilet)}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </TabsContent>

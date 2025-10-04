@@ -32,6 +32,7 @@
     "directions": "Directions",
     "viewDetails": "View Details",
     "nearby": "Nearby Toilets",
+    "within5km": "Toilets within 5km",
     "addFirst": "Add First Toilet",
     "distance": {
       "meters": "{{distance}}m away",

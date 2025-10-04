@@ -219,6 +219,11 @@ const Index = () => {
     setDetailsOpen(true);
   };
 
+  const handleMarkerClick = (toilet: any) => {
+    setSelectedToilet(toilet);
+    setDetailsOpen(true);
+  };
+
   const handleMapClick = (lat: number, lng: number) => {
     setPinnedLocation({ lat, lng });
     fetchNearbyToilets(lat, lng);
@@ -515,7 +520,7 @@ const Index = () => {
 
               <ToiletMap
                 toilets={filteredToilets}
-                onToiletSelect={setSelectedToilet}
+                onToiletSelect={handleMarkerClick}
                 selectedToiletId={selectedToilet?.id}
                 directionsTo={directionsTo}
                 onDirectionsCalculated={(duration, distance) => {

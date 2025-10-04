@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
+declare global {
+  interface Window {
+    google: any;
+    initMap: () => void;
+  }
+}
+
 interface Toilet {
   id: string;
   name: string;
@@ -20,10 +27,12 @@ interface ToiletMapProps {
 
 const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId }: ToiletMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const googleMapRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   useEffect(() => {
-    // Get user location
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -33,7 +42,6 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId }: ToiletMapProps
           });
         },
         () => {
-          // Default to Kaunas center if geolocation fails
           setUserLocation({ lat: 54.8985, lng: 23.9036 });
         }
       );
@@ -42,42 +50,106 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId }: ToiletMapProps
     }
   }, []);
 
-  // For now, show a simple map placeholder
-  // In production, integrate with Google Maps or Mapbox
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_SUPABASE_URL ? 'AIzaSyCXmVzAuTFb1qdjCarQHuCVhAP_GJctmBs' : '';
+    
+    if (!apiKey) return;
+
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setIsMapLoaded(true);
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isMapLoaded || !mapRef.current || !userLocation || !window.google) return;
+
+    googleMapRef.current = new window.google.maps.Map(mapRef.current, {
+      center: userLocation,
+      zoom: 14,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'off' }]
+        }
+      ]
+    });
+
+    new window.google.maps.Marker({
+      position: userLocation,
+      map: googleMapRef.current,
+      icon: {
+        path: window.google.maps.SymbolPath.CIRCLE,
+        scale: 8,
+        fillColor: '#3b82f6',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2,
+      },
+      title: 'Your Location'
+    });
+  }, [isMapLoaded, userLocation]);
+
+  useEffect(() => {
+    if (!googleMapRef.current || !window.google) return;
+
+    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current = [];
+
+    toilets.forEach((toilet) => {
+      const marker = new window.google.maps.Marker({
+        position: { lat: toilet.latitude, lng: toilet.longitude },
+        map: googleMapRef.current,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: toilet.type === 'free' ? '#10b981' : '#f59e0b',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+        },
+        title: toilet.name
+      });
+
+      marker.addListener('click', () => {
+        onToiletSelect?.(toilet);
+        googleMapRef.current?.panTo({ lat: toilet.latitude, lng: toilet.longitude });
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [toilets, onToiletSelect]);
+
+  useEffect(() => {
+    if (!googleMapRef.current || !selectedToiletId) return;
+
+    const selectedToilet = toilets.find(t => t.id === selectedToiletId);
+    if (selectedToilet) {
+      googleMapRef.current.panTo({ 
+        lat: selectedToilet.latitude, 
+        lng: selectedToilet.longitude 
+      });
+      googleMapRef.current.setZoom(16);
+    }
+  }, [selectedToiletId, toilets]);
+
   return (
     <div ref={mapRef} className="relative w-full h-[400px] bg-secondary rounded-xl overflow-hidden">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center space-y-2">
-          <MapPin className="h-12 w-12 text-primary mx-auto" />
-          <p className="text-sm text-muted-foreground">
-            Map integration will be added
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {userLocation ? `Location: ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'Getting location...'}
-          </p>
+      {!isMapLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center space-y-2">
+            <MapPin className="h-12 w-12 text-primary mx-auto animate-pulse" />
+            <p className="text-sm text-muted-foreground">Loading map...</p>
+          </div>
         </div>
-      </div>
-      
-      {/* Toilet markers overlay */}
-      <div className="absolute top-4 left-4 space-y-2 max-h-[calc(100%-2rem)] overflow-y-auto">
-        {toilets.slice(0, 5).map((toilet) => (
-          <button
-            key={toilet.id}
-            onClick={() => onToiletSelect?.(toilet)}
-            className={`flex items-center gap-2 px-3 py-2 bg-card rounded-lg shadow-lg hover:shadow-xl transition-all ${
-              selectedToiletId === toilet.id ? 'ring-2 ring-primary' : ''
-            }`}
-          >
-            <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
-            <div className="text-left text-sm">
-              <div className="font-medium">{toilet.name}</div>
-              <Badge variant={toilet.type === 'free' ? 'default' : 'secondary'} className="text-xs">
-                {toilet.type === 'free' ? 'Free' : `€${toilet.price}`}
-              </Badge>
-            </div>
-          </button>
-        ))}
-      </div>
+      )}
     </div>
   );
 };

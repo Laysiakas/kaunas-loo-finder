@@ -246,24 +246,27 @@ const Index = () => {
       return;
     }
     
-    // Mobile deep linking
+    // Mobile deep linking - platform specific
     if (isIOS) {
-      // Try Google Maps app first
-      const googleMapsUrl = `comgooglemaps://?saddr=${origin}&daddr=${destination}&directionsmode=walking`;
-      window.location.href = googleMapsUrl;
-      
-      // Fallback to Apple Maps after a delay
-      setTimeout(() => {
-        window.location.href = `maps://?saddr=${origin}&daddr=${destination}&dirflg=w`;
-      }, 500);
+      // Use Apple Maps for iOS devices
+      window.location.href = `maps://?saddr=${origin}&daddr=${destination}&dirflg=w`;
+      toast({
+        title: 'Opening Apple Maps',
+        description: 'Launching navigation...',
+      });
     } else if (isAndroid) {
-      // Try Google Maps navigation
+      // Use Google Maps for Android devices
       window.location.href = `google.navigation:q=${destination}&mode=w`;
       
-      // Fallback to geo intent
+      // Fallback to geo intent if Google Maps navigation doesn't work
       setTimeout(() => {
         window.location.href = `geo:0,0?q=${destination}(${encodeURIComponent(toilet.name)})`;
       }, 500);
+      
+      toast({
+        title: 'Opening Google Maps',
+        description: 'Launching navigation...',
+      });
     }
   };
 
@@ -542,8 +545,10 @@ const Index = () => {
                           onClick={() => openInGoogleMaps(selectedToilet)}
                         >
                           <Smartphone className="h-4 w-4" />
-                          {/iPhone|iPad|iPod|Android/.test(navigator.userAgent) 
-                            ? 'Open in Google Maps' 
+                          {/iPhone|iPad|iPod/.test(navigator.userAgent) 
+                            ? 'Open in Apple Maps' 
+                            : /Android/.test(navigator.userAgent)
+                            ? 'Open in Google Maps'
                             : 'Copy Coordinates'}
                         </Button>
                       </div>
@@ -628,8 +633,10 @@ const Index = () => {
                       onClick={() => openInGoogleMaps(selectedToilet)}
                     >
                       <Smartphone className="h-4 w-4" />
-                      {/iPhone|iPad|iPod|Android/.test(navigator.userAgent) 
-                        ? 'Open in Google Maps App' 
+                      {/iPhone|iPad|iPod/.test(navigator.userAgent) 
+                        ? 'Open in Apple Maps' 
+                        : /Android/.test(navigator.userAgent)
+                        ? 'Open in Google Maps'
                         : 'Copy Coordinates for Maps App'}
                     </Button>
                   </div>

@@ -329,19 +329,14 @@ const Index = () => {
     // Mobile deep linking - platform specific
     if (isIOS) {
       // Use Apple Maps for iOS devices
-      window.location.href = `maps://?saddr=${origin}&daddr=${destination}&dirflg=w`;
+      window.location.href = `http://maps.apple.com/?saddr=${origin}&daddr=${destination}&dirflg=w`;
       toast({
         title: t('navigation.openingAppleMaps'),
         description: t('navigation.launching'),
       });
     } else if (isAndroid) {
-      // Use Google Maps for Android devices
-      window.location.href = `google.navigation:q=${destination}&mode=w`;
-      
-      // Fallback to geo intent if Google Maps navigation doesn't work
-      setTimeout(() => {
-        window.location.href = `geo:0,0?q=${destination}(${encodeURIComponent(toilet.name)})`;
-      }, 500);
+      // Use Google Maps for Android devices with proper URL scheme
+      window.location.href = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=walking`;
       
       toast({
         title: t('navigation.openingGoogleMaps'),

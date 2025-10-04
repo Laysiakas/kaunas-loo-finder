@@ -22,15 +22,28 @@ const LocationPicker = ({ onLocationSelect, initialLat, initialLng }: LocationPi
   const geocoderRef = useRef<any>(null);
 
   useEffect(() => {
+    // Check if script already loaded
+    if (window.google && window.google.maps) {
+      setIsLoaded(true);
+      return;
+    }
+
+    // Check if script is already being loaded
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existingScript) {
+      existingScript.addEventListener('load', () => setIsLoaded(true));
+      return;
+    }
+
+    const apiKey = import.meta.env.VITE_SUPABASE_URL ? 'AIzaSyCXmVzAuTFb1qdjCarQHuCVhAP_GJctmBs' : '';
+    if (!apiKey) return;
+
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
     script.async = true;
+    script.defer = true;
     script.onload = () => setIsLoaded(true);
     document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
   }, []);
 
   useEffect(() => {

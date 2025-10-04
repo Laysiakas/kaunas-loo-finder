@@ -718,6 +718,17 @@ const Index = () => {
               </SheetHeader>
 
               <div className="mt-6 space-y-6">
+                {selectedToilet.image_url && (
+                  <div>
+                    <h3 className="font-semibold mb-2">{t('details.photo')}</h3>
+                    <img 
+                      src={selectedToilet.image_url} 
+                      alt={selectedToilet.name}
+                      className="w-full h-64 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+
                 {selectedToilet.description && (
                   <div>
                     <h3 className="font-semibold mb-2">{t('details.description')}</h3>

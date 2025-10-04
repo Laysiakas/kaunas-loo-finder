@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy } from 'lucide-react';
+import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy, Clock, ArrowUpDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ToiletMap from '@/components/ToiletMap';
 import ToiletCard from '@/components/ToiletCard';
@@ -32,10 +32,12 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'free' | 'paid'>('all');
+  const [sortBy, setSortBy] = useState<'distance' | 'rating'>('distance');
   const [selectedToilet, setSelectedToilet] = useState<any>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [directionsTo, setDirectionsTo] = useState<{ lat: number; lng: number } | null>(null);
+  const [routeInfo, setRouteInfo] = useState<{ duration: string; distance: string } | null>(null);
 
   useEffect(() => {
     // Check authentication
@@ -107,13 +109,31 @@ const Index = () => {
         latitude: toilet.latitude,
         longitude: toilet.longitude,
         type: 'free',
-        rating: toilet.rating,
+        rating: toilet.rating || 0,
+        distance: userLocation ? calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          toilet.latitude,
+          toilet.longitude
+        ) : 0,
       })) || [];
       
       setNearbyToilets(formattedToilets);
     } catch (error: any) {
       console.error('Error fetching nearby toilets:', error);
     }
+  };
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in km
   };
 
   const fetchToilets = async () => {
@@ -143,7 +163,21 @@ const Index = () => {
   };
 
   const getFilteredToilets = () => {
-    const allToilets = [...toilets, ...nearbyToilets];
+    const allToilets = [...toilets, ...nearbyToilets].map(toilet => {
+      if (!toilet.distance && userLocation) {
+        return {
+          ...toilet,
+          distance: calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            toilet.latitude,
+            toilet.longitude
+          )
+        };
+      }
+      return toilet;
+    });
+
     let filtered = allToilets;
 
     if (typeFilter !== 'all') {
@@ -157,6 +191,13 @@ const Index = () => {
       );
     }
 
+    // Sort by distance or rating
+    if (sortBy === 'distance') {
+      filtered.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+    } else if (sortBy === 'rating') {
+      filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+
     return filtered;
   };
 
@@ -168,10 +209,7 @@ const Index = () => {
   const handleGetDirections = (toilet: any) => {
     setDirectionsTo({ lat: toilet.latitude, lng: toilet.longitude });
     setDetailsOpen(false);
-    toast({
-      title: 'Showing Directions',
-      description: 'Route displayed on the map',
-    });
+    setRouteInfo(null);
   };
 
   const copyCoordinates = () => {
@@ -244,7 +282,7 @@ const Index = () => {
           />
         </div>
         
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center flex-wrap">
           <Filter className="h-4 w-4 text-muted-foreground" />
           <Button
             variant={typeFilter === 'all' ? 'default' : 'outline'}
@@ -269,6 +307,24 @@ const Index = () => {
           >
             Paid
           </Button>
+
+          <div className="w-px h-6 bg-border mx-1" />
+          
+          <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+          <Button
+            variant={sortBy === 'distance' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSortBy('distance')}
+          >
+            Distance
+          </Button>
+          <Button
+            variant={sortBy === 'rating' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSortBy('rating')}
+          >
+            Rating
+          </Button>
         </div>
       </div>
 
@@ -292,7 +348,26 @@ const Index = () => {
               onToiletSelect={setSelectedToilet}
               selectedToiletId={selectedToilet?.id}
               directionsTo={directionsTo}
+              onDirectionsCalculated={(duration, distance) => {
+                setRouteInfo({ duration, distance });
+                toast({
+                  title: 'Route Found',
+                  description: `${distance} • ${duration} walking`,
+                });
+              }}
             />
+
+            {routeInfo && (
+              <div className="bg-primary text-primary-foreground rounded-lg p-4 shadow-lg">
+                <div className="flex items-center gap-3">
+                  <Clock className="h-5 w-5" />
+                  <div>
+                    <p className="font-semibold">{routeInfo.duration}</p>
+                    <p className="text-sm opacity-90">{routeInfo.distance} walking</p>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {loading && (
               <div className="text-center py-8">

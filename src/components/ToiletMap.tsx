@@ -24,9 +24,10 @@ interface ToiletMapProps {
   onToiletSelect?: (toilet: Toilet) => void;
   selectedToiletId?: string;
   directionsTo?: { lat: number; lng: number } | null;
+  onDirectionsCalculated?: (duration: string, distance: string) => void;
 }
 
-const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo }: ToiletMapProps) => {
+const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, onDirectionsCalculated }: ToiletMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -171,10 +172,13 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo }: 
       (result: any, status: any) => {
         if (status === 'OK') {
           directionsRendererRef.current?.setDirections(result);
+          const route = result.routes[0];
+          const leg = route.legs[0];
+          onDirectionsCalculated?.(leg.duration.text, leg.distance.text);
         }
       }
     );
-  }, [directionsTo, userLocation]);
+  }, [directionsTo, userLocation, onDirectionsCalculated]);
 
   return (
     <div ref={mapRef} className="relative w-full h-[400px] bg-secondary rounded-xl overflow-hidden">

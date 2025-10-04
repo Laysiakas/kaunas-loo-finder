@@ -1,4 +1,4 @@
-import { MapPin, Star, Navigation, Euro, Clock, Accessibility } from 'lucide-react';
+import { MapPin, Star, Navigation, Euro, Clock, Accessibility, MapPinned } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,8 @@ interface ToiletCardProps {
     description?: string;
     opening_hours?: string;
     accessibility_features?: string[];
+    rating?: number;
+    distance?: number;
   };
   averageRating?: number;
   totalReviews?: number;
@@ -70,7 +72,24 @@ const ToiletCard = ({ toilet, averageRating, totalReviews, onViewDetails, onGetD
           </p>
         )}
         
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          {toilet.distance !== undefined && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPinned className="h-3 w-3" />
+              {toilet.distance < 1 
+                ? `${(toilet.distance * 1000).toFixed(0)}m away`
+                : `${toilet.distance.toFixed(1)}km away`
+              }
+            </div>
+          )}
+
+          {toilet.rating !== undefined && toilet.rating > 0 && (
+            <div className="flex items-center gap-1 text-xs">
+              <Star className="h-3 w-3 fill-warning text-warning" />
+              <span className="text-muted-foreground">{toilet.rating.toFixed(1)}</span>
+            </div>
+          )}
+          
           {toilet.opening_hours && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />

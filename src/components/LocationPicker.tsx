@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card } from "./ui/card";
 
 // Declare google maps types
@@ -15,6 +16,7 @@ interface LocationPickerProps {
 }
 
 const LocationPicker = ({ onLocationSelect, initialLat, initialLng }: LocationPickerProps) => {
+  const { t } = useTranslation();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -126,9 +128,9 @@ const LocationPicker = ({ onLocationSelect, initialLat, initialLng }: LocationPi
   return (
     <Card className="p-4 space-y-2">
       <div className="space-y-1">
-        <h3 className="text-sm font-medium">Pin the toilet location</h3>
+        <h3 className="text-sm font-medium">{t('addToilet.pinLocation')}</h3>
         <p className="text-xs text-muted-foreground">
-          Click on the map to place a pin, or drag the pin to adjust the location
+          {t('addToilet.pinLocationDesc')}
         </p>
       </div>
       <div 

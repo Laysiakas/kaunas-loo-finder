@@ -63,8 +63,8 @@ const AddToilet = () => {
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
         toast({
-          title: 'Error',
-          description: 'Image must be less than 5MB',
+          title: t('addToilet.error'),
+          description: t('addToilet.imageSizeError'),
           variant: 'destructive',
         });
         return;
@@ -103,7 +103,7 @@ const AddToilet = () => {
     if (!imageFile) {
       toast({
         title: t('addToilet.error'),
-        description: 'Please upload a photo of the toilet location',
+        description: t('addToilet.photoVerificationDesc'),
         variant: 'destructive',
       });
       return;
@@ -112,7 +112,7 @@ const AddToilet = () => {
     if (formData.latitude === 0 || formData.longitude === 0) {
       toast({
         title: t('addToilet.error'),
-        description: 'Please pin the location on the map',
+        description: t('addToilet.pinLocationRequired'),
         variant: 'destructive',
       });
       return;
@@ -231,9 +231,9 @@ const AddToilet = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Photo Verification (Required)</Label>
+                <Label>{t('addToilet.photoVerification')}</Label>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Upload a photo of the toilet location to verify its existence
+                  {t('addToilet.photoVerificationDesc')}
                 </p>
                 {!imagePreview ? (
                   <div className="relative">
@@ -249,7 +249,7 @@ const AddToilet = () => {
                       className="flex items-center justify-center gap-2 h-32 border-2 border-dashed rounded-md cursor-pointer hover:border-primary transition-colors"
                     >
                       <Upload className="h-6 w-6" />
-                      <span>Click to upload image</span>
+                      <span>{t('addToilet.uploadImage')}</span>
                     </Label>
                   </div>
                 ) : (

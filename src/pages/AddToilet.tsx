@@ -327,15 +327,20 @@ const AddToilet = () => {
               <div className="space-y-3">
                 <Label>{t('addToilet.accessibility')}</Label>
                 <div className="space-y-2">
-                  {['Wheelchair accessible', 'Handrails', 'Baby changing station', 'Wide door'].map((feature) => (
-                    <div key={feature} className="flex items-center space-x-2">
+                  {[
+                    { key: 'Wheelchair accessible', label: t('addToilet.wheelchairAccessible') },
+                    { key: 'Handrails', label: t('addToilet.handrails') },
+                    { key: 'Baby changing station', label: t('addToilet.babyChangingStation') },
+                    { key: 'Wide door', label: t('addToilet.wideDoor') }
+                  ].map(({ key, label }) => (
+                    <div key={key} className="flex items-center space-x-2">
                       <Checkbox
-                        id={feature}
-                        checked={accessibilityFeatures.includes(feature)}
-                        onCheckedChange={() => toggleAccessibility(feature)}
+                        id={key}
+                        checked={accessibilityFeatures.includes(key)}
+                        onCheckedChange={() => toggleAccessibility(key)}
                       />
-                      <Label htmlFor={feature} className="font-normal cursor-pointer">
-                        {feature}
+                      <Label htmlFor={key} className="font-normal cursor-pointer">
+                        {label}
                       </Label>
                     </div>
                   ))}

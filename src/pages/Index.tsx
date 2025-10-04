@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy, Clock, ArrowUpDown } from 'lucide-react';
+import { MapPin, List, Plus, Search, User, LogOut, Filter, Star, Navigation2, Copy, Clock, ArrowUpDown, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ToiletMap from '@/components/ToiletMap';
 import ToiletCard from '@/components/ToiletCard';
@@ -208,7 +208,13 @@ const Index = () => {
 
   const handleGetDirections = (toilet: any) => {
     setDirectionsTo({ lat: toilet.latitude, lng: toilet.longitude });
+    setSelectedToilet(toilet);
     setDetailsOpen(false);
+    setRouteInfo(null);
+  };
+
+  const handleCancelNavigation = () => {
+    setDirectionsTo(null);
     setRouteInfo(null);
   };
 
@@ -350,20 +356,50 @@ const Index = () => {
               directionsTo={directionsTo}
               onDirectionsCalculated={(duration, distance) => {
                 setRouteInfo({ duration, distance });
-                toast({
-                  title: 'Route Found',
-                  description: `${distance} • ${duration} walking`,
-                });
               }}
             />
 
-            {routeInfo && (
-              <div className="bg-primary text-primary-foreground rounded-lg p-4 shadow-lg">
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5" />
-                  <div>
-                    <p className="font-semibold">{routeInfo.duration}</p>
-                    <p className="text-sm opacity-90">{routeInfo.distance} walking</p>
+            {/* Navigation Panel - Google Maps style */}
+            {routeInfo && directionsTo && selectedToilet && (
+              <div className="bg-card border rounded-xl shadow-xl overflow-hidden">
+                <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Navigation2 className="h-5 w-5" />
+                    <div>
+                      <p className="font-bold text-lg">{routeInfo.duration}</p>
+                      <p className="text-xs opacity-90">{routeInfo.distance}</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={handleCancelNavigation}
+                    className="text-primary-foreground hover:bg-primary-foreground/20"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+                <div className="p-4">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold">{selectedToilet.name}</p>
+                      <p className="text-sm text-muted-foreground">{selectedToilet.address}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge 
+                          variant={selectedToilet.type === 'free' ? 'default' : 'secondary'}
+                          className={selectedToilet.type === 'free' ? 'bg-success' : 'bg-warning'}
+                        >
+                          {selectedToilet.type === 'free' ? 'Free' : `€${selectedToilet.price}`}
+                        </Badge>
+                        {selectedToilet.rating && selectedToilet.rating > 0 && (
+                          <div className="flex items-center gap-1 text-sm">
+                            <Star className="h-3 w-3 fill-warning text-warning" />
+                            <span>{selectedToilet.rating.toFixed(1)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

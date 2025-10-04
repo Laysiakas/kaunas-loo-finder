@@ -144,7 +144,13 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
   }, [selectedToiletId, toilets]);
 
   useEffect(() => {
-    if (!googleMapRef.current || !window.google || !directionsTo || !userLocation) return;
+    if (!googleMapRef.current || !window.google || !directionsTo || !userLocation) {
+      if (directionsRendererRef.current) {
+        directionsRendererRef.current.setMap(null);
+        directionsRendererRef.current = null;
+      }
+      return;
+    }
 
     // Clear previous directions
     if (directionsRendererRef.current) {
@@ -157,7 +163,7 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
       suppressMarkers: false,
       polylineOptions: {
         strokeColor: '#0ea5e9',
-        strokeWeight: 4,
+        strokeWeight: 5,
       }
     });
 
@@ -170,15 +176,25 @@ const ToiletMap = ({ toilets, onToiletSelect, selectedToiletId, directionsTo, on
         travelMode: window.google.maps.TravelMode.WALKING,
       },
       (result: any, status: any) => {
-        if (status === 'OK') {
+        if (status === 'OK' && result) {
           directionsRendererRef.current?.setDirections(result);
+          
+          // Zoom to fit the route
+          const bounds = new window.google.maps.LatLngBounds();
+          bounds.extend(userLocation);
+          bounds.extend(directionsTo);
+          googleMapRef.current?.fitBounds(bounds, { padding: 80 });
+          
+          // Send route info only once
           const route = result.routes[0];
           const leg = route.legs[0];
-          onDirectionsCalculated?.(leg.duration.text, leg.distance.text);
+          if (onDirectionsCalculated) {
+            onDirectionsCalculated(leg.duration.text, leg.distance.text);
+          }
         }
       }
     );
-  }, [directionsTo, userLocation, onDirectionsCalculated]);
+  }, [directionsTo?.lat, directionsTo?.lng, userLocation?.lat, userLocation?.lng]);
 
   return (
     <div ref={mapRef} className="relative w-full h-[400px] bg-secondary rounded-xl overflow-hidden">

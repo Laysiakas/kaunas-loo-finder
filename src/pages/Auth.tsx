@@ -84,6 +84,10 @@ const Auth = () => {
         return;
       }
 
+      const redirectUrl = isNativeMode() 
+        ? 'kaunasloofinder://auth/callback'
+        : `${window.location.origin}/`;
+        
       const { error } = await supabase.auth.signUp({
         email: validationResult.data.email,
         password: validationResult.data.password,
@@ -91,7 +95,7 @@ const Auth = () => {
           data: {
             username: validationResult.data.username,
           },
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: redirectUrl,
         },
       });
 

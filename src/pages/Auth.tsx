@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { MapPin } from 'lucide-react';
 import { z } from 'zod';
+import { isNativeMode } from '@/App';
 
 // Validation schemas
 const signUpSchema = z.object({
@@ -45,6 +46,11 @@ const Auth = () => {
   const [username, setUsername] = useState('');
 
   useEffect(() => {
+    // Skip auth redirect in native mode
+    if (isNativeMode()) {
+      return;
+    }
+    
     // Check if user is already logged in
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -145,7 +151,10 @@ const Auth = () => {
         description: 'Logged in successfully.',
       });
       
-      navigate('/');
+      // Skip navigation in native mode
+      if (!isNativeMode()) {
+        navigate('/');
+      }
     } catch (error: any) {
       toast({
         title: 'Error',

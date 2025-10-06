@@ -3,10 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AddToilet from "./pages/AddToilet";
 import NotFound from "./pages/NotFound";
+
+// Export helper to check if running in native mode
+export const isNativeMode = () => Capacitor.isNativePlatform();
 
 const queryClient = new QueryClient();
 

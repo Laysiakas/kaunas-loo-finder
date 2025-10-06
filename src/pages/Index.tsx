@@ -47,14 +47,10 @@ const Index = () => {
   const [addressSearch, setAddressSearch] = useState('');
 
   useEffect(() => {
-    // Check authentication
+    // Check authentication (optional)
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/auth');
-        return;
-      }
-      setUser(session.user);
+      setUser(session?.user ?? null);
     };
 
     checkAuth();
@@ -62,20 +58,15 @@ const Index = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
-      if (!session) {
-        navigate('/auth');
-      }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
 
   useEffect(() => {
-    if (user) {
-      fetchToilets();
-      getUserLocation();
-    }
-  }, [user]);
+    fetchToilets();
+    getUserLocation();
+  }, []);
 
   const getUserLocation = () => {
     if (navigator.geolocation) {
@@ -365,14 +356,6 @@ const Index = () => {
   };
 
   const filteredToilets = getFilteredToilets();
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden w-full max-w-full">

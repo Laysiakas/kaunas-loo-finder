@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,11 +39,13 @@ const signInSchema = z.object({
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const returnTo = searchParams.get('returnTo') || '/';
 
   useEffect(() => {
     // Skip auth redirect in native mode
@@ -55,7 +57,7 @@ const Auth = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/');
+        navigate(returnTo);
       }
     };
     checkUser();
@@ -99,13 +101,13 @@ const Auth = () => {
 
       toast({
         title: 'Success!',
-        description: 'Account created successfully. You can now log in.',
+        description: 'Account created successfully. Logging you in...',
       });
       
-      // Switch to login tab
-      setEmail('');
-      setPassword('');
-      setUsername('');
+      // Redirect to returnTo path
+      if (!isNativeMode()) {
+        navigate(returnTo);
+      }
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -153,7 +155,7 @@ const Auth = () => {
       
       // Skip navigation in native mode
       if (!isNativeMode()) {
-        navigate('/');
+        navigate(returnTo);
       }
     } catch (error: any) {
       toast({
